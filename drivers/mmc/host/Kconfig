@@ -366,6 +366,14 @@ config MMC_MXS
 
 	  If unsure, say N.
 
+config MMC_MXS_NODETECT
+	bool "Ignore card detection status on MXS MMC interface"
+	depends on MMC_MXS
+	help
+	  This disables card presence detection in MXS MMC slot.
+	  If only boot device is MMC card and/or you want to use
+	  SSP_DETECT pin as GPIO, say Y here.
+
 config MMC_S3C
 	tristate "Samsung S3C SD/MMC Card Interface support"
 	depends on ARCH_S3C2410

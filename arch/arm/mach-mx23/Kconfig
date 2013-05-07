@@ -6,6 +6,13 @@ config MACH_MX23EVK
 	depends on ARCH_MX23
 	select USB_ARCH_HAS_EHCI
 
+config MACH_IMX233_OLINUXINO
+	bool "iMX233-OLinuXino low cost board"
+	depends on ARCH_MX23
+	select USB_ARCH_HAS_EHCI
+	select MMC_MXS
+	select MMC_MXS_NODETECT
+
 endchoice
 
 

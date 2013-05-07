@@ -20,9 +20,12 @@
  *  published by the Free Software Foundation.
  */
 
+#define DEBUG
+
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/input.h>
+#include <linux/irq.h>
 #include <linux/interrupt.h>
 #include <linux/i2c.h>
 #include <linux/i2c/tsc2007.h>
@@ -101,6 +104,7 @@ static inline int tsc2007_xfer(struct tsc2007 *tsc, u8 cmd)
 	val = swab16(data) >> 4;
 
 	dev_dbg(&tsc->client->dev, "data: 0x%x, val: 0x%x\n", data, val);
+	printk("data: 0x%x, val: 0x%x\n", data, val);
 
 	return val;
 }
@@ -159,6 +163,7 @@ static void tsc2007_work(struct work_struct *work)
 	struct ts_event tc;
 	u32 rt;
 
+  //printk("TSC2007: work!");
 	/*
 	 * NOTE: We can't rely on the pressure to determine the pen down
 	 * state, even though this controller has a pressure sensor.
@@ -235,7 +240,7 @@ static void tsc2007_work(struct work_struct *work)
 static irqreturn_t tsc2007_irq(int irq, void *handle)
 {
 	struct tsc2007 *ts = handle;
-
+  //printk("TSC2007: IRQ!");
 	if (!ts->get_pendown_state || likely(ts->get_pendown_state())) {
 		disable_irq_nosync(ts->irq);
 		schedule_delayed_work(&ts->work,
@@ -319,8 +324,13 @@ static int __devinit tsc2007_probe(struct i2c_client *client,
 	if (pdata->init_platform_hw)
 		pdata->init_platform_hw();
 
-	err = request_irq(ts->irq, tsc2007_irq, 0,
+	/* configure gpio as input for interrupt monitor */
+
+	set_irq_type(ts->irq, IRQF_TRIGGER_FALLING);
+
+	err = request_irq(ts->irq, tsc2007_irq, IRQF_TRIGGER_FALLING,
 			client->dev.driver->name, ts);
+
 	if (err < 0) {
 		dev_err(&client->dev, "irq %d busy?\n", ts->irq);
 		goto err_free_mem;

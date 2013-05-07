@@ -45,6 +45,7 @@
 #include "device.h"
 #include "mx23_pins.h"
 #include "mx23evk.h"
+#include "imx233_olinuxino.h"
 #include "mach/mx23.h"
 
 #if defined(CONFIG_SERIAL_MXS_DUART) || \

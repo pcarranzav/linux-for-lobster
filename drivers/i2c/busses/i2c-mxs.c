@@ -288,12 +288,16 @@ static int mxs_i2c_xfer_msg(struct i2c_adapter *adap,
 	struct mxs_i2c_dev *dev = i2c_get_adapdata(adap);
 	int err;
 	int flags;
-
+  int k;
 	init_completion(&dev->cmd_complete);
 	dev->cmd_err = 0;
 
 	dev_dbg(dev->dev, "addr: 0x%04x, len: %d, flags: 0x%x, stop: %d\n",
 		msg->addr, msg->len, msg->flags, stop);
+	
+	for(k=0;k<msg->len;k++)
+	  printk("0x%02x ",msg->buf[k]);
+	printk("\n");
 
 	if ((msg->len == 0) || (msg->len > (PAGE_SIZE - 1)))
 		return -EINVAL;
@@ -365,7 +369,8 @@ mxs_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 
 static u32 mxs_i2c_func(struct i2c_adapter *adap)
 {
-	return I2C_FUNC_I2C | (I2C_FUNC_SMBUS_EMUL & ~I2C_FUNC_SMBUS_QUICK);
+	//return I2C_FUNC_I2C | (I2C_FUNC_SMBUS_EMUL & ~I2C_FUNC_SMBUS_QUICK);
+	return I2C_FUNC_I2C | (I2C_FUNC_SMBUS_EMUL);
 }
 
 static irqreturn_t mxs_i2c_dma_isr(int this_irq, void *dev_id)

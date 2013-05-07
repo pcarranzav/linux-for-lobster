@@ -160,8 +160,12 @@ static int mxs_mmc_get_ro(struct mmc_host *mmc)
 /* Detect if card is plugged */
 static inline int mxs_mmc_is_plugged(struct mxs_mmc_host *host)
 {
+#if defined(CONFIG_MMC_MXS_NODETECT)
+	return 1;
+#else
 	u32 status = __raw_readl(host->ssp_base + HW_SSP_STATUS);
 	return !(status & BM_SSP_STATUS_CARD_DETECT);
+#endif
 }
 
 static void mxs_mmc_reset(struct mxs_mmc_host *host);
