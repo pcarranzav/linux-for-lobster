@@ -105,7 +105,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 		},
 		
 #else
-		{
+	/*	{
 				.name = "UEXT.5",
 				.id = PINID_LCD_ENABLE,
 				.fun = PIN_GPIO,
@@ -120,7 +120,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.strength = PAD_12MA,
 				.drive = 1,
-		},
+		},*/
 #endif
 #if defined(CONFIG_FB_MXS) || defined(CONFIG_FB_MXS_MODULE)
 		{
@@ -314,6 +314,14 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.id = PINID_LCD_DOTCK,
 				.fun = PIN_GPIO,
 				.strength = PAD_12MA,
+				.voltage = PAD_3_3V,
+				.drive	= 1,
+		},
+		{
+				.name = "LCD_BACKLIGHT",
+				.id = PINID_PWM2,
+				.fun = PIN_FUN1,
+				.strength = PAD_8MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
