@@ -484,7 +484,16 @@ static int mxsfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 			var->transp.offset = 0;
 			var->transp.length = 0;
 		}
-	} else {
+	} 
+	else if (var->bits_per_pixel == 8) {
+		var->red.offset = 5;
+		var->red.length = 3;
+		var->green.offset = 3;
+		var->green.length = 2;
+		var->blue.offset = 0;
+		var->blue.length = 3;
+	}
+	else {
 		var->red.offset = 16;
 		var->red.length = 8;
 		var->green.offset = 8;
@@ -609,7 +618,9 @@ static void init_timings(struct mxs_fb_data *data)
 {
 	unsigned phase_time;
 	unsigned timings;
-
+	
+	// IRRELEVANT for DOTCLK mode.
+	
 	/* Just use a phase_time of 1. As optimal as it gets, now. */
 	phase_time = 1;
 
@@ -781,6 +792,14 @@ static int __devinit mxsfb_probe(struct platform_device *pdev)
 		mxsfb_default.green.length = 6;
 		mxsfb_default.blue.offset = 0;
 		mxsfb_default.blue.length = 5;
+		break;
+	case 8:
+		mxsfb_default.red.offset = 5;
+		mxsfb_default.red.length = 3;
+		mxsfb_default.green.offset = 3;
+		mxsfb_default.green.length = 2;
+		mxsfb_default.blue.offset = 0;
+		mxsfb_default.blue.length = 3;
 		break;
 
 	default:

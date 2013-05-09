@@ -51,7 +51,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.fun   = PIN_FUN3,
 		},
 #else
-		{
+	/*	{
 				.name  = "UEXT.4",
 				.id    = PINID_I2C_SDA,
 				.fun   = PIN_GPIO,
@@ -66,16 +66,16 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.strength = PAD_8MA,
 				.drive = 1,
-		},
+		},*/
 #endif
 
 #if defined(CONFIG_I2C_MXS) || \
 		defined(CONFIG_I2C_MXS_MODULE)
-		{
+	/*	{
 				.name = "I2C_SCL",
 				.id = PINID_LCD_ENABLE,
 				.fun = PIN_FUN2,
-				.strength = PAD_4MA,
+				.strength = PAD_8MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
@@ -83,10 +83,27 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name = "I2C_SDA",
 				.id = PINID_LCD_HSYNC,
 				.fun = PIN_FUN2,
-				.strength = PAD_4MA,
+				.strength = PAD_8MA,
+				.voltage = PAD_3_3V,
+				.drive	= 1,
+		},*/
+		{
+				.name  = "I2C_SDA",
+				.id    = PINID_I2C_SDA,
+				.fun   = PIN_FUN1,
+				.strength = PAD_8MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
+		{
+				.name  = "I2C_SCL",
+				.id    = PINID_I2C_SCL,
+				.fun   = PIN_FUN1,
+				.strength = PAD_8MA,
+				.voltage = PAD_3_3V,
+				.drive	= 1,
+		},
+		
 #else
 		{
 				.name = "UEXT.5",
@@ -106,7 +123,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 		},
 #endif
 #if defined(CONFIG_FB_MXS) || defined(CONFIG_FB_MXS_MODULE)
-	/*	{
+		{
 				.name  = "LCD_D00",
 				.id	= PINID_LCD_D00,
 				.fun	= PIN_FUN1,
@@ -210,7 +227,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
-		*/
+		
 #else
 		{
 				.name = "GPIO.35",

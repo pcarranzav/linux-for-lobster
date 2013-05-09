@@ -17,9 +17,14 @@ config FB_MXS_LCD_43WVF1G
 config FB_MXS_LCD_LMS430
 	depends on FB_MXS
 	bool "LMS430"
-	default y if ARCH_MX23
 	---help---
 	  Use LMS430 dotclock LCD panel for MXS
+	  
+config FB_MXS_LCD_AT56
+	depends on FB_MXS
+	bool "AT56"
+	---help---
+	  Use AT56 dotclock LCD panel for MXS
 
 config FB_MXS_TVENC
 	depends on ARCH_MXS

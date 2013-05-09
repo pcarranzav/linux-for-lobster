@@ -74,12 +74,15 @@ static void hw_i2c_dmachan_reset(struct mxs_i2c_dev *dev)
 	mxs_dma_ack_irq(dev->dma_chan);
 }
 
-static mxs_i2c_reset(struct mxs_i2c_dev *mxs_i2c)
+static void mxs_i2c_reset(struct mxs_i2c_dev *mxs_i2c)
 {
 	hw_i2c_dmachan_reset(mxs_i2c);
 	mxs_dma_enable_irq(mxs_i2c->dma_chan, 1);
 	mxs_reset_block((void __iomem *)mxs_i2c->regbase, 0);
 	__raw_writel(0x0000FF00, mxs_i2c->regbase + HW_I2C_CTRL1_SET);
+	__raw_writel(0x00780030, mxs_i2c->regbase + HW_I2C_TIMING0_SET);
+	__raw_writel(0x00800030, mxs_i2c->regbase + HW_I2C_TIMING1_SET);
+	__raw_writel(0x00300030, mxs_i2c->regbase + HW_I2C_TIMING2_SET);
 }
 
 static int hw_i2c_dma_init(struct platform_device *pdev)
@@ -295,9 +298,9 @@ static int mxs_i2c_xfer_msg(struct i2c_adapter *adap,
 	dev_dbg(dev->dev, "addr: 0x%04x, len: %d, flags: 0x%x, stop: %d\n",
 		msg->addr, msg->len, msg->flags, stop);
 	
-	for(k=0;k<msg->len;k++)
-	  printk("0x%02x ",msg->buf[k]);
-	printk("\n");
+	//for(k=0;k<msg->len;k++)
+	  //printk("0x%02x ",msg->buf[k]);
+	//printk("\n");
 
 	if ((msg->len == 0) || (msg->len > (PAGE_SIZE - 1)))
 		return -EINVAL;
@@ -334,14 +337,17 @@ static int mxs_i2c_xfer_msg(struct i2c_adapter *adap,
 	    );
 	if (err <= 0) {
 		mxs_i2c_reset(dev);
-		dev_dbg(dev->dev, "controller is timed out\n");
+		dev_err(dev->dev, "controller is timed out\n");
 		return -ETIMEDOUT;
 	}
 
+	if(dev->cmd_err)
+		dev_err(dev->dev, "not finishing with err=%d\n", dev->cmd_err);
 	if ((!dev->cmd_err) && (msg->flags & I2C_M_RD))
 		hw_i2c_finish_read(dev, msg->buf, msg->len);
 
-	dev_dbg(dev->dev, "Done with err=%d\n", dev->cmd_err);
+	if(dev->cmd_err)
+		dev_err(dev->dev, "Done with err=%d\n", dev->cmd_err);
 
 	return dev->cmd_err;
 }
@@ -525,7 +531,9 @@ static int mxs_i2c_probe(struct platform_device *pdev)
 
 	/* Will catch all error (IRQ mask) */
 	__raw_writel(0x0000FF00, mxs_i2c->regbase + HW_I2C_CTRL1_SET);
-
+	__raw_writel(0x00780030, mxs_i2c->regbase + HW_I2C_TIMING0_SET);
+	__raw_writel(0x00800030, mxs_i2c->regbase + HW_I2C_TIMING1_SET);
+	__raw_writel(0x00300030, mxs_i2c->regbase + HW_I2C_TIMING2_SET);
 	adap = &mxs_i2c->adapter;
 	strncpy(adap->name, "MXS I2C adapter", sizeof(adap->name));
 	adap->owner = THIS_MODULE;

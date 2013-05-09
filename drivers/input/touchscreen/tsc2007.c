@@ -20,7 +20,7 @@
  *  published by the Free Software Foundation.
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -30,8 +30,8 @@
 #include <linux/i2c.h>
 #include <linux/i2c/tsc2007.h>
 
-#define TS_POLL_DELAY			1 /* ms delay between samples */
-#define TS_POLL_PERIOD			1 /* ms delay between samples */
+#define TS_POLL_DELAY			10 /* ms delay between samples */
+#define TS_POLL_PERIOD			10 /* ms delay between samples */
 
 #define TSC2007_MEASURE_TEMP0		(0x0 << 4)
 #define TSC2007_MEASURE_AUX		(0x2 << 4)
@@ -62,6 +62,8 @@
 #define READ_Z2		(ADC_ON_12BIT | TSC2007_MEASURE_Z2)
 #define READ_X		(ADC_ON_12BIT | TSC2007_MEASURE_X)
 #define PWRDOWN		(TSC2007_12BIT | TSC2007_POWER_OFF_IRQ_EN)
+
+//#define PWRDOWN		(TSC2007_12BIT | TSC2007_ADC_OFF_IRQ_EN)
 
 struct ts_event {
 	u16	x;
@@ -104,7 +106,7 @@ static inline int tsc2007_xfer(struct tsc2007 *tsc, u8 cmd)
 	val = swab16(data) >> 4;
 
 	dev_dbg(&tsc->client->dev, "data: 0x%x, val: 0x%x\n", data, val);
-	printk("data: 0x%x, val: 0x%x\n", data, val);
+	//printk("data: 0x%x, val: 0x%x\n", data, val);
 
 	return val;
 }
@@ -112,15 +114,20 @@ static inline int tsc2007_xfer(struct tsc2007 *tsc, u8 cmd)
 static void tsc2007_read_values(struct tsc2007 *tsc, struct ts_event *tc)
 {
 	/* y- still on; turn on only y+ (and ADC) */
+	//dev_err(&tsc->client->dev, "Read Y\n");
 	tc->y = tsc2007_xfer(tsc, READ_Y);
 
+	//dev_err(&tsc->client->dev, "Read X\n");
 	/* turn y- off, x+ on, then leave in lowpower */
 	tc->x = tsc2007_xfer(tsc, READ_X);
 
+	//dev_err(&tsc->client->dev, "Read Z1\n");
 	/* turn y+ off, x- on; we'll use formula #1 */
 	tc->z1 = tsc2007_xfer(tsc, READ_Z1);
+	//dev_err(&tsc->client->dev, "Read Z2\n");
 	tc->z2 = tsc2007_xfer(tsc, READ_Z2);
 
+	//dev_err(&tsc->client->dev, "Pwrdown\n");
 	/* Prepare for next touch reading - power down ADC, enable PENIRQ */
 	tsc2007_xfer(tsc, PWRDOWN);
 }

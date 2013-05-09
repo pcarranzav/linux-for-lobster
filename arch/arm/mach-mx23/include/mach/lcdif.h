@@ -167,12 +167,13 @@ static inline void setup_dotclk_panel(u16 v_pulse_width,
 {
 	u32 val;
 
-	__raw_writel(BM_LCDIF_CTRL_DATA_SHIFT_DIR,
-		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
 
-	__raw_writel(BM_LCDIF_CTRL_SHIFT_NUM_BITS,
-		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
+	//no data shift
+	__raw_writel(BM_LCDIF_CTRL_DATA_SHIFT_DIR, REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
+	__raw_writel(BM_LCDIF_CTRL_SHIFT_NUM_BITS,  REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
 
+
+		
 	__raw_writel(BM_LCDIF_CTRL1_BYTE_PACKING_FORMAT,
 		     REGS_LCDIF_BASE + HW_LCDIF_CTRL1_CLR);
 	__raw_writel(BF_LCDIF_CTRL1_BYTE_PACKING_FORMAT(7) |
@@ -264,6 +265,122 @@ static inline void setup_dotclk_panel(u16 v_pulse_width,
 	val |= BM_LCDIF_VDCTRL4_SYNC_SIGNALS_ON;
 	__raw_writel(val, REGS_LCDIF_BASE + HW_LCDIF_VDCTRL4);
 }
+
+
+
+static inline void setup_dotclk_panel_8bit(u16 v_pulse_width,
+				      u16 v_period,
+				      u16 v_wait_cnt,
+				      u16 v_active,
+				      u16 h_pulse_width,
+				      u16 h_period,
+				      u16 h_wait_cnt,
+				      u16 h_active, int enable_present)
+{
+	u32 val;
+
+	//no shift
+	__raw_writel(BM_LCDIF_CTRL_DATA_SHIFT_DIR,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
+	__raw_writel(BM_LCDIF_CTRL_SHIFT_NUM_BITS,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
+
+	// byte packing 0001
+	__raw_writel(BM_LCDIF_CTRL1_BYTE_PACKING_FORMAT,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL1_CLR);
+	__raw_writel(BF_LCDIF_CTRL1_BYTE_PACKING_FORMAT(1) |
+		     BM_LCDIF_CTRL1_RECOVER_ON_UNDERFLOW,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL1_SET);
+
+
+	// set screen resolution (valid data count)
+	val = __raw_readl(REGS_LCDIF_BASE + HW_LCDIF_TRANSFER_COUNT);
+	val &= ~(BM_LCDIF_TRANSFER_COUNT_V_COUNT |
+		 BM_LCDIF_TRANSFER_COUNT_H_COUNT);
+	val |= BF_LCDIF_TRANSFER_COUNT_H_COUNT(h_active) |
+	    BF_LCDIF_TRANSFER_COUNT_V_COUNT(v_active);
+	__raw_writel(val, REGS_LCDIF_BASE + HW_LCDIF_TRANSFER_COUNT);
+
+	//set DOTCLK mode
+	__raw_writel(BM_LCDIF_CTRL_VSYNC_MODE,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
+	__raw_writel(BM_LCDIF_CTRL_WAIT_FOR_VSYNC_EDGE,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
+	__raw_writel(BM_LCDIF_CTRL_DVI_MODE,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
+	__raw_writel(BM_LCDIF_CTRL_DOTCLK_MODE,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_SET);
+	__raw_writel(BM_LCDIF_CTRL_BYPASS_COUNT,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_SET);
+
+
+	// word length is 1 and data bus is 8 bit wide
+	__raw_writel(BM_LCDIF_CTRL_WORD_LENGTH |
+		     BM_LCDIF_CTRL_INPUT_DATA_SWIZZLE |
+		     BM_LCDIF_CTRL_LCD_DATABUS_WIDTH,
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_CLR);
+	__raw_writel(BF_LCDIF_CTRL_WORD_LENGTH(1) |/* 8 bit */
+		     BM_LCDIF_CTRL_DATA_SELECT |/* data mode */
+		     BF_LCDIF_CTRL_INPUT_DATA_SWIZZLE(0) |/* no swap */
+		     BF_LCDIF_CTRL_LCD_DATABUS_WIDTH(1),/* 8 bit */
+		     REGS_LCDIF_BASE + HW_LCDIF_CTRL_SET);
+
+
+	// set horizontal timing values (VSYNC), default polarities
+	val = __raw_readl(REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0);
+	val &= ~(BM_LCDIF_VDCTRL0_VSYNC_POL | 
+		 BM_LCDIF_VDCTRL0_HSYNC_POL |
+		 BM_LCDIF_VDCTRL0_ENABLE_POL | BM_LCDIF_VDCTRL0_DOTCLK_POL);
+//	val |= BM_LCDIF_VDCTRL0_ENABLE_POL | BM_LCDIF_VDCTRL0_DOTCLK_POL;
+	__raw_writel(val, REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0);
+
+	val = __raw_readl(REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0);
+	val &= ~(BM_LCDIF_VDCTRL0_VSYNC_OEB);
+	/* vsync is output */
+	__raw_writel(val, REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0);
+
+	/*
+	 * For DOTCLK mode, count VSYNC_PERIOD in terms of complete hz lines
+	 */
+	val = __raw_readl(REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0);
+	val &= ~(BM_LCDIF_VDCTRL0_VSYNC_PERIOD_UNIT |
+		 BM_LCDIF_VDCTRL0_VSYNC_PULSE_WIDTH_UNIT);
+	val |= BM_LCDIF_VDCTRL0_VSYNC_PERIOD_UNIT |
+	    BM_LCDIF_VDCTRL0_VSYNC_PULSE_WIDTH_UNIT;
+	__raw_writel(val, REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0);
+
+	// set VSYNC pulse width
+	__raw_writel(BM_LCDIF_VDCTRL0_VSYNC_PULSE_WIDTH,
+		     REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0_CLR);
+	__raw_writel(v_pulse_width, REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0_SET);
+
+	//set vsync period
+	__raw_writel(BF_LCDIF_VDCTRL1_VSYNC_PERIOD(v_period),
+		     REGS_LCDIF_BASE + HW_LCDIF_VDCTRL1);
+
+	//set  hsync pulse width and period
+	__raw_writel(BF_LCDIF_VDCTRL2_HSYNC_PULSE_WIDTH(h_pulse_width) |
+		     BF_LCDIF_VDCTRL2_HSYNC_PERIOD(h_period),
+		     REGS_LCDIF_BASE + HW_LCDIF_VDCTRL2);
+
+	//set horizontal active width
+	val = __raw_readl(REGS_LCDIF_BASE + HW_LCDIF_VDCTRL4);
+	val &= ~BM_LCDIF_VDCTRL4_DOTCLK_H_VALID_DATA_CNT;
+	val |= BF_LCDIF_VDCTRL4_DOTCLK_H_VALID_DATA_CNT(h_active);
+	__raw_writel(val, REGS_LCDIF_BASE + HW_LCDIF_VDCTRL4);
+
+	val = __raw_readl(REGS_LCDIF_BASE + HW_LCDIF_VDCTRL3);
+	val &= ~(BM_LCDIF_VDCTRL3_HORIZONTAL_WAIT_CNT |
+		 BM_LCDIF_VDCTRL3_VERTICAL_WAIT_CNT);
+	val |= BF_LCDIF_VDCTRL3_HORIZONTAL_WAIT_CNT(h_wait_cnt) |
+	    BF_LCDIF_VDCTRL3_VERTICAL_WAIT_CNT(v_wait_cnt);
+	__raw_writel(val, REGS_LCDIF_BASE + HW_LCDIF_VDCTRL3);
+
+	val = __raw_readl(REGS_LCDIF_BASE + HW_LCDIF_VDCTRL4);
+	val |= BM_LCDIF_VDCTRL4_SYNC_SIGNALS_ON;
+	__raw_writel(val, REGS_LCDIF_BASE + HW_LCDIF_VDCTRL4);
+}
+
 
 static inline void release_dotclk_panel(void)
 {

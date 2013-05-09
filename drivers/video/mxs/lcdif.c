@@ -54,8 +54,8 @@ void mxs_init_lcdif(void)
 		     REGS_LCDIF_BASE + HW_LCDIF_CTRL1_SET);
 
 	/* VSYNC is an input by default */
-	__raw_writel(BM_LCDIF_VDCTRL0_VSYNC_OEB,
-		     REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0_SET);
+	//__raw_writel(BM_LCDIF_VDCTRL0_VSYNC_OEB,
+	//	     REGS_LCDIF_BASE + HW_LCDIF_VDCTRL0_SET);
 
 	/* Reset display */
 	__raw_writel(BM_LCDIF_CTRL1_RESET,
