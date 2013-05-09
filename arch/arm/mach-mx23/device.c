@@ -672,6 +672,50 @@ static void mx23_init_mmc(void)
 #endif
 
 #if defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE)
+	#if defined(CONFIG_SPI_MXS_SSP2)
+static struct mxs_spi_platform_data ssp2_data = {
+	.hw_pin_init = mxs_spi2_pin_init,
+	.hw_pin_release = mxs_spi2_pin_release,
+	.clk = "ssp.0",
+};
+
+static struct resource ssp2_resources[] = {
+	{
+		.start	= SSP2_PHYS_ADDR,
+		.end	= SSP2_PHYS_ADDR + 0x1FFF,
+		.flags	= IORESOURCE_MEM,
+	}, {
+		.start	= IRQ_SSP2_DMA,
+		.end	= IRQ_SSP2_DMA,
+		.flags	= IORESOURCE_IRQ,
+	}, {
+		.start	= IRQ_SSP2_ERROR,
+		.end	= IRQ_SSP2_ERROR,
+		.flags	= IORESOURCE_IRQ,
+	}, {
+		.start	= MXS_DMA_CHANNEL_AHB_APBH_SSP2,
+		.end	= MXS_DMA_CHANNEL_AHB_APBH_SSP2,
+		.flags	= IORESOURCE_DMA,
+	},
+};
+
+static void __init mx23_init_spi2(void)
+{
+	struct platform_device *pdev;
+
+	pdev = mxs_get_device("mxs-spi", 0);
+	if (pdev == NULL || IS_ERR(pdev))
+		return;
+	pdev->resource = ssp2_resources;
+	pdev->num_resources = ARRAY_SIZE(ssp2_resources);
+	pdev->dev.platform_data = &ssp2_data;
+
+	mxs_add_device(pdev, 3);
+}
+
+
+	#else //SPI on SSP1
+
 static struct mxs_spi_platform_data ssp1_data = {
 	.hw_pin_init = mxs_spi_enc_pin_init,
 	.hw_pin_release = mxs_spi_enc_pin_release,
@@ -711,12 +755,15 @@ static void __init mx23_init_spi1(void)
 
 	mxs_add_device(pdev, 3);
 }
+	#endif
 #else
 static void mx23_init_spi1(void)
 {
 	;
 }
 #endif
+
+
 
 #define CMDLINE_DEVICE_CHOOSE(name, dev1, dev2)			\
 	static char *cmdline_device_##name;			\
@@ -738,7 +785,24 @@ static void mx23_init_spi1(void)
 				#name, cmdline_device_##name);	\
 	}
 
+#if defined(CONFIG_SPI_MXS_SSP2)
+void mx23_init_ssp1(void)				
+{							
+		mx23_init_mmc();		
+}
+
+void mx23_init_ssp2(void)				
+{							
+		mx23_init_spi2();		
+}
+
+#else
+void mx23_init_ssp2(void)				
+{							
+	
+}
 CMDLINE_DEVICE_CHOOSE(ssp1, mmc, spi1)
+#endif
 
 #if defined(CONFIG_BATTERY_MXS)
 /* battery info data */
@@ -996,6 +1060,7 @@ int __init mx23_device_init(void)
 	mx23_init_rtc();
 	mx23_init_dcp();
 	mx23_init_ssp1();
+	mx23_init_ssp2();
 	mx23_init_gpmi_nfc();
 	mx23_init_spdif();
 	mx23_init_lcdif();

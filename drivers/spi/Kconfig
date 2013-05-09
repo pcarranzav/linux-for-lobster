@@ -348,6 +348,12 @@ config SPI_MXS
 	depends on ARCH_MXS && SPI_MASTER
 	help
 	  SPI driver for Freescale MXS SoC SSP interface
+	  
+config SPI_MXS_SSP2
+	bool "MXS SPI on SSP2 (instead of SSP1)
+	depends on SPI_MXS
+	help
+		SPI driver for MXS is SSP1 by default (conflict with MMC). This sets it on SSP2.
 
 #
 # Add new SPI master controllers in alphabetical order above this line

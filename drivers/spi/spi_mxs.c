@@ -99,8 +99,8 @@ out:
 static void mxs_spi_release_hw(struct mxs_spi *ss)
 {
 	if (ss->clk && !IS_ERR(ss->clk)) {
-		clk_disable(ss->clk);
-		clk_put(ss->clk);
+		//clk_disable(ss->clk);
+		//clk_put(ss->clk);
 	}
 }
 
@@ -619,7 +619,9 @@ static int __init mxs_spi_probe(struct platform_device *dev)
 		goto out_free_dma_desc;
 	}
 
-	clk_set_rate(ss->clk, 120 * 1000 * 1000);
+	//we shouldn't change clock rate as it is shared between both SSPs
+	//clk_set_rate(ss->clk, 120 * 1000 * 1000);
+	
 	ss->speed_khz = clk_get_rate(ss->clk) / 1000;
 	ss->divider = 2;
 	dev_info(&dev->dev, "Max possible speed %d = %ld/%d kHz\n",
@@ -710,7 +712,9 @@ static int mxs_spi_suspend(struct platform_device *pdev, pm_message_t pmsg)
 	ss = spi_master_get_devdata(master);
 
 	ss->saved_timings = __raw_readl(ss->regs + HW_SSP_TIMING);
-	clk_disable(ss->clk);
+	
+	//do not touch this clock! shared with other SSP
+	//clk_disable(ss->clk);
 
 	return 0;
 }

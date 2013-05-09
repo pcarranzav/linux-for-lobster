@@ -127,7 +127,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name  = "LCD_D00",
 				.id	= PINID_LCD_D00,
 				.fun	= PIN_FUN1,
-				.strength = PAD_8MA,
+				.strength = PAD_12MA,
 				.voltage	= PAD_3_3V,
 				.drive	= 1,
 		},
@@ -135,7 +135,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name  = "LCD_D01",
 				.id	= PINID_LCD_D01,
 				.fun	= PIN_FUN1,
-				.strength = PAD_8MA,
+				.strength = PAD_12MA,
 				.voltage	= PAD_3_3V,
 				.drive	= 1,
 		},
@@ -143,7 +143,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name  = "LCD_D02",
 				.id	= PINID_LCD_D02,
 				.fun	= PIN_FUN1,
-				.strength = PAD_8MA,
+				.strength = PAD_12MA,
 				.voltage	= PAD_3_3V,
 				.drive	= 1,
 		},
@@ -151,7 +151,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name  = "LCD_D03",
 				.id	= PINID_LCD_D03,
 				.fun	= PIN_FUN1,
-				.strength = PAD_8MA,
+				.strength = PAD_12MA,
 				.voltage	= PAD_3_3V,
 				.drive	= 1,
 		},
@@ -159,7 +159,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name  = "LCD_D04",
 				.id	= PINID_LCD_D04,
 				.fun	= PIN_FUN1,
-				.strength = PAD_8MA,
+				.strength = PAD_12MA,
 				.voltage	= PAD_3_3V,
 				.drive	= 1,
 		},
@@ -167,7 +167,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name  = "LCD_D05",
 				.id	= PINID_LCD_D05,
 				.fun	= PIN_FUN1,
-				.strength = PAD_8MA,
+				.strength = PAD_12MA,
 				.voltage	= PAD_3_3V,
 				.drive	= 1,
 		},
@@ -175,7 +175,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name  = "LCD_D06",
 				.id	= PINID_LCD_D06,
 				.fun	= PIN_FUN1,
-				.strength = PAD_8MA,
+				.strength = PAD_12MA,
 				.voltage	= PAD_3_3V,
 				.drive	= 1,
 		},
@@ -183,7 +183,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.name  = "LCD_D07",
 				.id	= PINID_LCD_D07,
 				.fun	= PIN_FUN1,
-				.strength = PAD_8MA,
+				.strength = PAD_12MA,
 				.voltage	= PAD_3_3V,
 				.drive	= 1,
 		},
@@ -357,14 +357,14 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
-		{
+	/*	{
 				.name = "UEXT.9",
-				.id = PINID_GPMI_WRN,
+				.id = PINID_GPMI_WRN, //Used in SPI2
 				.fun = PIN_GPIO,
 				.strength = PAD_12MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
-		},
+		},*/
 		{
 				.name = "UEXT.10",
 				.id = PINID_GPMI_RDY0,
@@ -373,14 +373,14 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
-		{
+		/*{
 				.name = "UEXT.8",
-				.id = PINID_GPMI_RDY1,
+				.id = PINID_GPMI_RDY1, // Used in SPI2
 				.fun = PIN_GPIO,
 				.strength = PAD_12MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
-		},
+		},*/
 		{
 				.name = "GPIO.04",
 				.id = PINID_GPMI_ALE,
@@ -391,7 +391,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.output = 1,
 				.data = 1,
 		},
-		{
+		{ //This is the TSC2007 IRQ pin
 				.name = "GPIO.03",
 				.id = PINID_GPMI_CLE,
 				.fun = PIN_GPIO,
@@ -431,14 +431,14 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
-		{
+	/*	{
 				.name = "GPIO.13",
-				.id = PINID_GPMI_D03,
+				.id = PINID_GPMI_D03, // Used in SPI2
 				.fun = PIN_GPIO,
 				.strength = PAD_12MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
-		},
+		},*/
 		{
 				.name = "GPIO.15",
 				.id = PINID_GPMI_D02,
@@ -455,14 +455,14 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
-		{
+	/*	{
 				.name = "GPIO.19",
-				.id = PINID_GPMI_D00,
+				.id = PINID_GPMI_D00, // Used in SPI2
 				.fun = PIN_GPIO,
 				.strength = PAD_12MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
-		},
+		}, */
 		{
 				.name = "GPIO.16",
 				.id = PINID_LCD_WR,
@@ -570,6 +570,43 @@ static struct pin_desc imx233_olinuxino_mmc_pins[] = {
 };
 #endif
 
+#if defined(CONFIG_SPI_MXS_SSP2)
+static struct pin_desc olinuxino_spi2_pins[] = {
+	{
+	 .name	= "SSP2_DATA0",
+	 .id	= PINID_GPMI_D00,
+	 .fun	= PIN_FUN3,
+	 .strength	= PAD_4MA,
+	 .voltage	= PAD_3_3V,
+	 .drive 	= 1,
+	 },
+	{
+	 .name	= "SSP2_DATA3",
+	 .id	= PINID_GPMI_D03,
+	 .fun	= PIN_FUN3,
+	 .strength	= PAD_4MA,
+	 .voltage	= PAD_3_3V,
+	 .drive 	= 1,
+	 },
+	{
+	 .name	= "SSP2_CMD",
+	 .id	= PINID_GPMI_RDY1,
+	 .fun	= PIN_FUN3,
+	 .strength	= PAD_4MA,
+	 .voltage	= PAD_3_3V,
+	 .drive 	= 1,
+	 },
+	{
+	 .name	= "SSP2_SCK",
+	 .id	= PINID_GPMI_WRN,
+	 .fun	= PIN_FUN3,
+	 .strength	= PAD_8MA,
+	 .voltage	= PAD_3_3V,
+	 .drive 	= 1,
+	 },
+};
+#endif
+
 static void mxs_request_pins(struct pin_desc *pins, int nr)
 {
 	int i;
@@ -614,7 +651,7 @@ int olinuxino_tsc2007_pin_init(void)
 }
 void olinuxino_tsc2007_pin_release(void)
 {
-	return 0;
+	return;
 }
 #endif
 
@@ -674,6 +711,32 @@ void mxs_mmc_hw_release_mmc0(void)
 
 void mxs_mmc_cmd_pullup_mmc0(int enable)
 {
+}
+#endif
+
+#if defined(CONFIG_SPI_MXS_SSP2)
+int mxs_spi2_pin_init(void)
+{
+	mxs_request_pins(olinuxino_spi2_pins, ARRAY_SIZE(olinuxino_spi2_pins));
+
+	return 0;
+}
+int mxs_spi2_pin_release(void)
+{
+
+	/* release the pins */
+	mxs_release_pins(olinuxino_spi2_pins, ARRAY_SIZE(olinuxino_spi2_pins));
+
+	return 0;
+}
+#else
+int mxs_spi_enc_pin_init(void)
+{
+	return 0;
+}
+int mxs_spi_enc_pin_release(void)
+{
+	return 0;
 }
 #endif
 

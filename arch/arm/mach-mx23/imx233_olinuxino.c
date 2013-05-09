@@ -90,6 +90,24 @@ static void i2c_device_init(void)
 }
 #endif
 
+static struct spi_board_info spi_board_info[] __initdata = {
+#if defined(CONFIG_SPI_SPIDEV)
+	{
+		.modalias       = "spidev",
+		//.max_speed_hz   = 48 * 1000 * 1000,
+		.bus_num	= 1,
+		.chip_select    = 0,
+	},
+#endif
+};
+
+static void spi_device_init(void)
+{
+	//No IRQ for the moment...
+	//spi_board_info[0].irq = gpio_to_irq(MXS_PIN_TO_GPIO(PINID_SSP1_DATA1)); 
+	spi_register_board_info(spi_board_info, ARRAY_SIZE(spi_board_info));
+}
+
 #if defined(CONFIG_SND_MXS_SOC_ADC) || defined(CONFIG_SND_MXS_SOC_ADC_MODULE)
 static void __init imx233_olinuxino_init_adc(void)
 {
@@ -112,6 +130,9 @@ static void __init imx233_olinuxino_device_init(void)
 	
 	#if defined(CONFIG_TOUCHSCREEN_TSC2007)
 	i2c_device_init();
+	#endif
+	#if defined(CONFIG_SPI_MXS)
+	spi_device_init();
 	#endif
 }
 

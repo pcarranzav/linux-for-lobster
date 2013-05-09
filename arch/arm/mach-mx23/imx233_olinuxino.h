@@ -27,5 +27,7 @@ extern void mxs_mmc_hw_release_mmc0(void);
 extern void mxs_mmc_cmd_pullup_mmc0(int enable);
 extern int olinuxino_tsc2007_pin_init(void);
 extern void olinuxino_tsc2007_pin_release(void);
+int mxs_spi2_pin_init(void);
+int mxs_spi2_pin_release(void);
 
 #endif /* __ASM_ARM_MACH_IMX233_OLINUXINO_H */
