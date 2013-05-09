@@ -227,7 +227,14 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
-		
+		{
+				.name = "LCD_BACKLIGHT",
+				.id = PINID_PWM2,
+				.fun = PIN_FUN1,
+				.strength = PAD_8MA,
+				.voltage = PAD_3_3V,
+				.drive	= 1,
+		},
 #else
 		{
 				.name = "GPIO.35",
@@ -314,14 +321,6 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.id = PINID_LCD_DOTCK,
 				.fun = PIN_GPIO,
 				.strength = PAD_12MA,
-				.voltage = PAD_3_3V,
-				.drive	= 1,
-		},
-		{
-				.name = "LCD_BACKLIGHT",
-				.id = PINID_PWM2,
-				.fun = PIN_FUN1,
-				.strength = PAD_8MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
