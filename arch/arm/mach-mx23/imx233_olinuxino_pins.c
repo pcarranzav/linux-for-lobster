@@ -579,6 +579,7 @@ static struct pin_desc olinuxino_spi2_pins[] = {
 	 .strength	= PAD_4MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	 .pullup = 1,
 	 },
 	{
 	 .name	= "SSP2_DATA3",
@@ -587,6 +588,7 @@ static struct pin_desc olinuxino_spi2_pins[] = {
 	 .strength	= PAD_4MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	 .pullup = 1,
 	 },
 	{
 	 .name	= "SSP2_CMD",
@@ -595,6 +597,7 @@ static struct pin_desc olinuxino_spi2_pins[] = {
 	 .strength	= PAD_4MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	 .pullup = 1,
 	 },
 	{
 	 .name	= "SSP2_SCK",
@@ -603,6 +606,7 @@ static struct pin_desc olinuxino_spi2_pins[] = {
 	 .strength	= PAD_8MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	 .pullup = 1,
 	 },
 };
 #endif

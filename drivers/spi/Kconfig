@@ -350,7 +350,7 @@ config SPI_MXS
 	  SPI driver for Freescale MXS SoC SSP interface
 	  
 config SPI_MXS_SSP2
-	bool "MXS SPI on SSP2 (instead of SSP1)
+	bool "MXS SPI on SSP2 (instead of SSP1)"
 	depends on SPI_MXS
 	help
 		SPI driver for MXS is SSP1 by default (conflict with MMC). This sets it on SSP2.
@@ -396,6 +396,12 @@ config SPI_TLE62X0
 	  such as the TLE6220, TLE6230 and TLE6240.  This provides a
 	  sysfs interface, with each line presented as a kind of GPIO
 	  exposing both switch control and diagnostic feedback.
+	  
+config SPI_WAHOO
+	tristate "Wahoo acquisition device"
+	depends on SYSFS
+	help
+	  SPI driver for Wahoo.
 
 #
 # Add new SPI protocol masters in alphabetical order above this line

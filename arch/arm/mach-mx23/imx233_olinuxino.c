@@ -90,11 +90,19 @@ static void i2c_device_init(void)
 }
 #endif
 
+
 static struct spi_board_info spi_board_info[] __initdata = {
-#if defined(CONFIG_SPI_SPIDEV)
+#if defined(CONFIG_SPI_SPIDEV) || defined(CONFIG_SPI_SPIDEV_MODULE)
 	{
 		.modalias       = "spidev",
-		//.max_speed_hz   = 48 * 1000 * 1000,
+		.max_speed_hz   = 48 * 1000,
+		.bus_num	= 1,
+		.chip_select    = 0,
+	},
+#elif defined(CONFIG_SPI_WAHOO) || defined(CONFIG_SPI_WAHOO_MODULE)
+	{
+		.modalias       = "wahoo",
+		.max_speed_hz   = 48 * 1000 * 1000,
 		.bus_num	= 1,
 		.chip_select    = 0,
 	},
