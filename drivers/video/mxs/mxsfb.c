@@ -226,12 +226,12 @@ static struct fb_var_screeninfo mxsfb_default __devinitdata = {
 	.activate = FB_ACTIVATE_TEST,
 	.height = -1,
 	.width = -1,
-	.pixclock = 20000,
-	.left_margin = 64,
-	.right_margin = 64,
-	.upper_margin = 32,
+	.pixclock = 40000,
+	.left_margin = 134,
+	.right_margin = 16,
+	.upper_margin = 11,
 	.lower_margin = 32,
-	.hsync_len = 64,
+	.hsync_len = 10,
 	.vsync_len = 2,
 	.vmode = FB_VMODE_NONINTERLACED,
 };
@@ -760,11 +760,11 @@ static int __devinit mxsfb_probe(struct platform_device *pdev)
 
 	mxsfb_default.bits_per_pixel = pentry->bpp;
 	/* NB: rotated */
-	mxsfb_default.xres = pentry->y_res;
-	mxsfb_default.yres = pentry->x_res;
-	mxsfb_default.xres_virtual = pentry->y_res;
+	mxsfb_default.xres = pentry->x_res;
+	mxsfb_default.yres = pentry->y_res;
+	mxsfb_default.xres_virtual = pentry->x_res;
 	mxsfb_default.yres_virtual = data->map_size /
-	    (pentry->y_res * pentry->bpp / 8);
+	    (pentry->x_res * pentry->bpp / 8);
 	if (mxsfb_default.yres_virtual >= mxsfb_default.yres * 2)
 		mxsfb_default.yres_virtual = mxsfb_default.yres * 2;
 	else

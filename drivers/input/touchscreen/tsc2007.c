@@ -63,6 +63,9 @@
 #define READ_X		(ADC_ON_12BIT | TSC2007_MEASURE_X)
 #define PWRDOWN		(TSC2007_12BIT | TSC2007_POWER_OFF_IRQ_EN)
 
+#define ACTIVATE_X		(ADC_ON_12BIT | TSC2007_ACTIVATE_XN)
+#define ACTIVATE_Y		(ADC_ON_12BIT | TSC2007_ACTIVATE_YN)
+
 //#define PWRDOWN		(TSC2007_12BIT | TSC2007_ADC_OFF_IRQ_EN)
 
 struct ts_event {
@@ -115,10 +118,12 @@ static void tsc2007_read_values(struct tsc2007 *tsc, struct ts_event *tc)
 {
 	/* y- still on; turn on only y+ (and ADC) */
 	//dev_err(&tsc->client->dev, "Read Y\n");
+	tsc2007_xfer(tsc, ACTIVATE_X);
 	tc->y = tsc2007_xfer(tsc, READ_Y);
 
 	//dev_err(&tsc->client->dev, "Read X\n");
 	/* turn y- off, x+ on, then leave in lowpower */
+	tsc2007_xfer(tsc, ACTIVATE_Y);
 	tc->x = tsc2007_xfer(tsc, READ_X);
 
 	//dev_err(&tsc->client->dev, "Read Z1\n");

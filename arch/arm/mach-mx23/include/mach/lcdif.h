@@ -288,7 +288,7 @@ static inline void setup_dotclk_panel_8bit(u16 v_pulse_width,
 	// byte packing 0001
 	__raw_writel(BM_LCDIF_CTRL1_BYTE_PACKING_FORMAT,
 		     REGS_LCDIF_BASE + HW_LCDIF_CTRL1_CLR);
-	__raw_writel(BF_LCDIF_CTRL1_BYTE_PACKING_FORMAT(1) |
+	__raw_writel(BF_LCDIF_CTRL1_BYTE_PACKING_FORMAT(0xF) |
 		     BM_LCDIF_CTRL1_RECOVER_ON_UNDERFLOW,
 		     REGS_LCDIF_BASE + HW_LCDIF_CTRL1_SET);
 
