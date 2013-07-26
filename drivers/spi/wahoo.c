@@ -92,11 +92,19 @@ static int wahoo_send_command(struct wahoo_state *st,unsigned char cmd,unsigned 
 	
 	
 	ret =  spi_write_then_read(st->us, buf, nops+1, &val, 1);
+	//dev_err(&st->us->dev, "Received %x\n",val);
 	
 	if(ret<0)
+	{	
+		dev_err(&st->us->dev, " Error: SPI fail");
 		return ret;
+	}
 	else
+	{
+		if(val!=(unsigned char)1)
+			dev_err(&st->us->dev, "Error: Received %x\n instead of 1",val);
 		return val;	
+	}
 }
 
 static ssize_t wahoo_trigger_show(struct device *dev,
@@ -129,10 +137,10 @@ static ssize_t wahoo_trigger_store(struct device *dev,
 
 	mutex_lock(&st->lock);
 	
-	if ((tr->channel != st->trigger.channel) || (tr->slope != st->trigger.slope) || 
-		(tr->aut != st->trigger.aut) || (tr->roll != st->trigger.roll) || (tr->noise != st->trigger.noise) || 
-		(tr->hf != st->trigger.hf) )
-	{
+	//if ((tr->channel != st->trigger.channel) || (tr->slope != st->trigger.slope) || 
+	//	(tr->aut != st->trigger.aut) || (tr->roll != st->trigger.roll) || (tr->noise != st->trigger.noise) || 
+	//	(tr->hf != st->trigger.hf) )
+	//{
 		//Send trigger cmd.
 		ops[0] = ((tr->channel << TR_CHANNEL_OF) & TR_CHANNEL_MASK) | ((tr->slope << TR_SLOPE_OF) & TR_SLOPE_MASK) |
 					((tr->aut  << TR_AUTO_OF) & TR_AUTO_MASK) | ((tr->roll << TR_ROLL_OF) & TR_ROLL_MASK) |
@@ -150,10 +158,10 @@ static ssize_t wahoo_trigger_store(struct device *dev,
 			mutex_unlock(&st->lock);
 			return -EREMOTEIO;
 		}
-	}
+	//}
 	
-	if(tr->level != st->trigger.level)
-	{
+	//if(tr->level != st->trigger.level)
+	//{
 		ops[0] = tr->level;
 		ret = wahoo_send_command(st,CMD_TRIGGER_LEVEL,ops,1);
 		
@@ -167,10 +175,10 @@ static ssize_t wahoo_trigger_store(struct device *dev,
 			mutex_unlock(&st->lock);
 			return -EREMOTEIO;
 		}
-	}
+	//}
 	
-	if(tr->holdOff != st->trigger.holdOff)
-	{
+	//if(tr->holdOff != st->trigger.holdOff)
+	//{
 		ops[0] = tr->holdOff & TR_HOLDOFF_MASK;
 		ret = wahoo_send_command(st,CMD_TRIGGER_HOLDOFF,ops,1);
 		
@@ -184,7 +192,7 @@ static ssize_t wahoo_trigger_store(struct device *dev,
 			mutex_unlock(&st->lock);
 			return -EREMOTEIO;
 		}
-	}
+	//}
 	
 	//Save the new trigger configuration
 	memcpy(&(st->trigger),buf,sizeof(struct trig));
@@ -245,8 +253,8 @@ static ssize_t wahoo_channel_store(struct device *dev,
 
 	mutex_lock(&st->lock);
 	
-	if ((cha->on != st->channel[ch].on) || (cha->gain != st->channel[ch].gain) || (cha->coupling != st->channel[ch].coupling) )
-	{
+	//if ((cha->on != st->channel[ch].on) || (cha->gain != st->channel[ch].gain) || (cha->coupling != st->channel[ch].coupling) )
+	//{
 		//Send CHANNEL_CONF cmd.
 		ops[0] = ((cha->on << CH_ON_OF) & CH_ON_MASK) | ((cha->coupling << CH_COUPLING_OF) & CH_COUPLING_MASK) |
 					((cha->gain << CH_GAIN_OF) & CH_GAIN_MASK);
@@ -263,10 +271,10 @@ static ssize_t wahoo_channel_store(struct device *dev,
 			mutex_unlock(&st->lock);
 			return -EREMOTEIO;
 		}
-	}
+	//}
 	
-	if(cha->offset != st->channel[ch].offset)
-	{
+	//if(cha->offset != st->channel[ch].offset)
+	//{
 		ops[0] = (unsigned char)((cha->offset >> 16) & 0xFF) ;
 		ops[1] = (unsigned char)((cha->offset >> 8) & 0xFF) ;
 		ops[2] = (unsigned char)((cha->offset) & 0xFF) ;
@@ -283,7 +291,7 @@ static ssize_t wahoo_channel_store(struct device *dev,
 			mutex_unlock(&st->lock);
 			return -EREMOTEIO;
 		}
-	}
+	//}
 	
 	//Save the new channel configuration
 	memcpy(&(st->channel[ch]),buf,sizeof(struct chan));
@@ -309,11 +317,13 @@ static ssize_t wahoo_channel_data_show(struct device *dev,
 	ret = wahoo_send_command(st,CMD_CHANNEL_DATAREQ|ch,NULL,0);
 	if(ret<0)
 	{
+		//dev_err(&st->us->dev, "Ret: %x\n",ret);
 		mutex_unlock(&st->lock);
 		return ret;
 	}
 	else if(ret!=RESPONSE_OK)
 	{
+		//dev_err(&st->us->dev, "Ret: %x\n",ret);
 		mutex_unlock(&st->lock);
 		return -EREMOTEIO;
 	}
@@ -326,18 +336,22 @@ static ssize_t wahoo_channel_data_show(struct device *dev,
 	}
 	
 	length = ((nBuf[0] << 8) & 0xFF00) + nBuf[1];
-	
-	ret = wahoo_read_buf(st,st->rx_buff,length);
-	if(ret<0)
+	//dev_err(&st->us->dev, "Len: %d\n",length);
+	if(length)
 	{
-		mutex_unlock(&st->lock);
-		return ret;
+		ret = wahoo_read_buf(st,st->rx_buff,length);
+		
+		if(ret<0)
+		{
+			mutex_unlock(&st->lock);
+			return ret;
+		}
+	
+		memcpy(buf,st->rx_buff,length);
 	}
-	
-	memcpy(buf,st->rx_buff,length);
-	
 	mutex_unlock(&st->lock);
 
+	//sysfs_update_file()?
 	return length;
 }
 
@@ -370,8 +384,8 @@ static ssize_t wahoo_sample_rate_store(struct device *dev,
 
 	mutex_lock(&st->lock);
 	
-	if ( ((unsigned char)(buf[0] & SAMPLE_RATE_MASK)) != st->sampleRate)
-	{
+	//if ( ((unsigned char)(buf[0] & SAMPLE_RATE_MASK)) != st->sampleRate)
+	//{
 		//Send CHANNEL_CONF cmd.
 		ops[0] = (unsigned char) (buf[0] & SAMPLE_RATE_MASK);
 					
@@ -387,7 +401,7 @@ static ssize_t wahoo_sample_rate_store(struct device *dev,
 			mutex_unlock(&st->lock);
 			return -EREMOTEIO;
 		}
-	}
+	//}
 	
 	//Save the new sample rate configuration
 	st->sampleRate = (unsigned char) (buf[0] & SAMPLE_RATE_MASK);
@@ -427,10 +441,45 @@ static ssize_t wahoo_reset(struct device *dev,
 		}
 	}
 	
+	st->channel[0].id = 0;
+	st->channel[0].on = 0;
+	st->channel[0].gain = 1;
+	st->channel[0].coupling = 0;
+	st->channel[0].offset = 0;
+	
+	st->channel[1].id = 1;
+	st->channel[1].on = 0;
+	st->channel[1].gain = 1;
+	st->channel[1].coupling = 0;
+	st->channel[1].offset = 0;
+	
+	st->trigger.channel = 0;
+	st->trigger.slope = 1;
+	st->trigger.aut = 0;
+	st->trigger.roll = 0;
+	st->trigger.noise = 0;
+	st->trigger.hf = 0;
+	st->trigger.holdOff = 0;
+	st->trigger.level = 0;
 	
 	mutex_unlock(&st->lock);
 
 	return len;
+}
+
+static ssize_t wahoo_read_reset(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct wahoo_state *st = dev_get_drvdata(dev);
+
+
+	mutex_lock(&st->lock);
+
+	buf[0] = 0;
+	
+	mutex_unlock(&st->lock);
+
+	return 1;
 }
 
 static DEVICE_ATTR(trigger, S_IWUSR|S_IRUGO,
@@ -442,7 +491,7 @@ static DEVICE_ATTR(channelAstate, S_IWUSR|S_IRUGO,
 static DEVICE_ATTR(channelBstate, S_IWUSR|S_IRUGO,
 		wahoo_channel_show, wahoo_channel_store);
 
-static DEVICE_ATTR(sampleRate, S_IWUSR|S_IRUGO,
+static DEVICE_ATTR(sampleRate, S_IWUSR |S_IRUGO,
 		wahoo_sample_rate_show, wahoo_sample_rate_store);
 
 static DEVICE_ATTR(channelAdata, S_IRUGO,
@@ -451,8 +500,8 @@ static DEVICE_ATTR(channelAdata, S_IRUGO,
 static DEVICE_ATTR(channelBdata, S_IRUGO,
 		wahoo_channel_data_show, NULL);
 		
-static DEVICE_ATTR(reset, S_IWUSR,
-		NULL, wahoo_reset);
+static DEVICE_ATTR(reset, S_IWUSR | S_IRUGO,
+		wahoo_read_reset, wahoo_reset);
 
 static struct device_attribute * wahoo_attrs[] = {
 	&dev_attr_channelAstate,

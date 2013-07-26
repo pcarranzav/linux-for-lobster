@@ -102,7 +102,7 @@ static struct spi_board_info spi_board_info[] __initdata = {
 #elif defined(CONFIG_SPI_WAHOO) || defined(CONFIG_SPI_WAHOO_MODULE)
 	{
 		.modalias       = "wahoo",
-		.max_speed_hz   = 48 * 1000 * 1000,
+		.max_speed_hz   = 1000 * 1000, // Max Speed is 1MHz
 		.bus_num	= 1,
 		.chip_select    = 0,
 	},
