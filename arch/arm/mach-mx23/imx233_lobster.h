@@ -1,4 +1,5 @@
 /*
+ * Copyleft 2013 Pablo Carranza Velez, pablocarranza@gmail.com
  * Copyright (C) 2012 RRKB IK, Raivis Rengelis, raivis@rrkb.lv
  * Copyright (C) 2009-2010 Freescale Semiconductor, Inc. All Rights Reserved.
  *
@@ -17,19 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ASM_ARM_MACH_IMX233_OLINUXINO_H
-#define __ASM_ARM_MACH_IMX233_OLINUXINO_H
+#ifndef __ASM_ARM_MACH_IMX233_LOBSTER_H
+#define __ASM_ARM_MACH_IMX233_LOBSTER_H
 
-#if defined(CONFIG_MACH_IMX233_OLINUXINO)
-extern void __init imx233_olinuxino_pins_init(void);
+#if defined(CONFIG_MACH_IMX233_LOBSTER)
+
+extern void __init imx233_lobster_pins_init(void);
 extern int mxs_mmc_hw_init_mmc0(void);
 extern int mxs_mmc_get_wp_mmc0(void);
 extern void mxs_mmc_hw_release_mmc0(void);
 extern void mxs_mmc_cmd_pullup_mmc0(int enable);
-extern int olinuxino_tsc2007_pin_init(void);
-extern void olinuxino_tsc2007_pin_release(void);
+extern int lobster_tsc2007_pin_init(void);
+extern void lobster_tsc2007_pin_release(void);
 int mxs_spi2_pin_init(void);
 int mxs_spi2_pin_release(void);
+
 #endif
 
-#endif /* __ASM_ARM_MACH_IMX233_OLINUXINO_H */
+#endif /* __ASM_ARM_MACH_IMX233_LOBSTER_H */

@@ -46,6 +46,7 @@
 #include "mx23_pins.h"
 #include "mx23evk.h"
 #include "imx233_olinuxino.h"
+#include "imx233_lobster.h"
 #include "mach/mx23.h"
 
 #if defined(CONFIG_SERIAL_MXS_DUART) || \
@@ -628,6 +629,31 @@ static struct mxs_mmc_platform_data mx23_mmc0_data = {
 	.power_mmc = NULL,
 };
 
+#if defined(CONFIG_MACH_IMX233_LOBSTER)
+static struct resource mx23_mmc0_resource[] = {
+	{
+		.flags	= IORESOURCE_MEM,
+		.start	= SSP2_PHYS_ADDR,
+		.end	= SSP2_PHYS_ADDR + 0x2000 - 1,
+	},
+	{
+		.flags	= IORESOURCE_DMA,
+		.start	= MXS_DMA_CHANNEL_AHB_APBH_SSP2,
+		.end	= MXS_DMA_CHANNEL_AHB_APBH_SSP2,
+	},
+	{
+		.flags	= IORESOURCE_IRQ,
+		.start	= IRQ_SSP2_DMA,
+		.end	= IRQ_SSP2_DMA,
+	},
+	{
+		.flags	= IORESOURCE_IRQ,
+		.start	= IRQ_SSP2_ERROR,
+		.end	= IRQ_SSP2_ERROR,
+	},
+};
+#else
+
 static struct resource mx23_mmc0_resource[] = {
 	{
 		.flags	= IORESOURCE_MEM,
@@ -650,6 +676,7 @@ static struct resource mx23_mmc0_resource[] = {
 		.end	= IRQ_SSP_ERROR,
 	},
 };
+#endif
 
 static void __init mx23_init_mmc(void)
 {
@@ -798,10 +825,20 @@ void mx23_init_ssp2(void)
 
 #else
 void mx23_init_ssp2(void)				
-{							
+{
+	#if defined(CONFIG_MACH_IMX233_LOBSTER)
+		mx23_init_mmc();
+	#endif				
 	
 }
+	#if defined(CONFIG_MACH_IMX233_LOBSTER)
+void mx23_init_ssp1(void)				
+{							
+		mx23_init_spi1();		
+}		
+	#else
 CMDLINE_DEVICE_CHOOSE(ssp1, mmc, spi1)
+	#endif	
 #endif
 
 #if defined(CONFIG_BATTERY_MXS)

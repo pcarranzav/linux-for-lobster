@@ -13,6 +13,13 @@ config MACH_IMX233_OLINUXINO
 	select MMC_MXS
 	select MMC_MXS_NODETECT
 
+config MACH_IMX233_LOBSTER
+	bool "The amazing iMX233 LobsterBoard"
+	depends on ARCH_MX23
+	select USB_ARCH_HAS_EHCI
+	select MMC_MXS
+	select MMC_MXS_NODETECT
+
 endchoice
 
 
