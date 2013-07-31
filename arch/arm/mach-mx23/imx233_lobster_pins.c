@@ -440,7 +440,7 @@ static struct pin_desc imx233_lobster_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},*/
-		{
+		/*{
 				.name = "GPIO.15",
 				.id = PINID_GPMI_D02,
 				.fun = PIN_GPIO,
@@ -455,7 +455,7 @@ static struct pin_desc imx233_lobster_fixed_pins[] = {
 				.strength = PAD_12MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
-		},
+		},*/
 	/*	{
 				.name = "GPIO.19",
 				.id = PINID_GPMI_D00, // Used in SPI2
