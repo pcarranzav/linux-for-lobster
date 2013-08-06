@@ -24,6 +24,7 @@
 #include <linux/platform_device.h>
 #include <linux/i2c.h>
 #include <linux/spi/spi.h>
+#include <linux/spi/flash.h>
 
 #include <asm/setup.h>
 #include <asm/mach-types.h>
@@ -89,8 +90,12 @@ static void i2c_device_init(void)
 	printk("done"); 
 }
 #endif
-
-
+#if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
+static struct flash_platform_data  flsh_data = {
+         .name = "m25p80",
+			.type = "mx25l25635e",
+};
+#endif
 static struct spi_board_info spi_board_info[] __initdata = {
 #if defined(CONFIG_SPI_SPIDEV) || defined(CONFIG_SPI_SPIDEV_MODULE)
 	{
@@ -105,6 +110,14 @@ static struct spi_board_info spi_board_info[] __initdata = {
 		.max_speed_hz   = 1000 * 1000, // Max Speed is 1MHz
 		.bus_num	= 1,
 		.chip_select    = 0,
+	},
+#elif defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
+	{
+		.modalias       = "m25p80",
+		.max_speed_hz   = 48 * 1000 * 1000, // Max Speed is 1MHz
+		.bus_num	= 1,
+		.chip_select    = 0,
+		.platform_data = &flsh_data,
 	},
 #endif
 };

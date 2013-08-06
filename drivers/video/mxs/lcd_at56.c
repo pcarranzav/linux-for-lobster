@@ -59,19 +59,19 @@ static int init_panel(struct device *dev, dma_addr_t phys, int memsize,
 	lcd_clk = clk_get(NULL, "lcdif");
 	if (IS_ERR(lcd_clk)) {
 		ret = PTR_ERR(lcd_clk);
-		goto out;
+		return ret;
 	}
 	ret = clk_enable(lcd_clk);
 	if (ret) {
 		clk_put(lcd_clk);
-		goto out;
+		return ret;
 	}
 
 	ret = clk_set_rate(lcd_clk, 1000000000 / pentry->cycle_time_ns);	/* Hz */
 	if (ret) {
 		clk_disable(lcd_clk);
 		clk_put(lcd_clk);
-		goto out;
+		return ret;
 	}
 
 
@@ -83,14 +83,11 @@ static int init_panel(struct device *dev, dma_addr_t phys, int memsize,
 
 	ret = mxs_lcdif_dma_init(dev, phys, memsize);
 	if (ret)
-		goto out;
+		return ret;
 
 	mxs_lcd_set_bl_pdata(pentry->bl_data);
 	mxs_lcdif_notify_clients(MXS_LCDIF_PANEL_INIT, pentry);
 	return 0;
-
-out:
-	return ret;
 }
 
 static void release_panel(struct device *dev,
