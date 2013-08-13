@@ -600,29 +600,17 @@ static int __devinit wahoo_probe(struct spi_device *spi)
 		ret = device_create_file(&spi->dev, wahoo_attrs[ptr]);
 		if (ret) {
 			dev_err(&spi->dev, "cannot create attribute %d\n",ptr);
-			goto err_files;
+			for (; ptr > 0; ptr--)
+				device_remove_file(&spi->dev, wahoo_attrs[ptr]);
+
+			return ret;
 		}
 	}
 	
 	spi_set_drvdata(spi, st);
 	
-	//Reset the device
-	/*
-	ret = wahoo_send_command(st,CMD_RESET,NULL, 0);
-	if (ret!=RESPONSE_OK)
-	{
-		ret = -EREMOTEIO;
-		goto err_files;
-	}
-	*/
 	return 0;
 
- err_files:
-	for (; ptr > 0; ptr--)
-		device_remove_file(&spi->dev, wahoo_attrs[ptr]);
-
-
-	return ret;
 }
 
 static int __devexit wahoo_remove(struct spi_device *spi)

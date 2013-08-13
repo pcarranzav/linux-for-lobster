@@ -241,7 +241,7 @@ static struct fb_fix_screeninfo mxsfb_fix __devinitdata = {
 	.type = FB_TYPE_PACKED_PIXELS,
 	.visual = FB_VISUAL_TRUECOLOR,
 	.xpanstep = 0,
-	.ypanstep = 0,
+	.ypanstep = 1,
 	.ywrapstep = 0,
 	.accel = FB_ACCEL_NONE,
 };
