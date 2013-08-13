@@ -730,6 +730,22 @@ static struct pin_desc lobster_spi1_pins[] = {
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
 	 },
+	 {
+	 .name	= "SSP1_DATA1",
+	 .id	= PINID_SSP1_DATA1,
+	 .fun	= PIN_FUN1,
+	 .strength	= PAD_4MA,
+	 .voltage	= PAD_3_3V,
+	 .drive 	= 1,
+	 },
+	 {
+	 .name	= "SSP1_DATA2",
+	 .id	= PINID_SSP1_DATA2,
+	 .fun	= PIN_FUN1,
+	 .strength	= PAD_4MA,
+	 .voltage	= PAD_3_3V,
+	 .drive 	= 1,
+	 },
 	{
 	 .name	= "SSP1_DATA3",
 	 .id	= PINID_SSP1_DATA3,
