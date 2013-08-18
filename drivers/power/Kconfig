@@ -163,6 +163,12 @@ config MXS_VBUS_CURRENT_DRAW
 	  Say Y to enable 100mA limitation when USB vbus power on system
 	  before enumeration to match USB2.0 requirement.
 
+config MXS_PERIPHERAL_POWER_SWITCH
+	bool "MXS Peripheral Power Switch on Olinuxino GPIO5"
+	depends on ARCH_MXS
+	help
+	  Say Y to enable a negative logic power on on pin GPIO5
+	  
 config BATTERY_DS2438
 	tristate "DS2438 battery driver"
 	select W1

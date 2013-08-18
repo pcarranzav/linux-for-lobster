@@ -399,6 +399,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},
+		// Our peripheral power switch pin
 		{
 				.name = "GPIO.05",
 				.id = PINID_GPMI_D07,
@@ -406,6 +407,10 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.strength = PAD_12MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
+#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
+				.output = 1,
+				.data = 0,
+#endif
 		},
 		{
 				.name = "GPIO.07",

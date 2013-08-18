@@ -46,6 +46,10 @@
 
 #include "sleep.h"
 
+#include <linux/gpio.h>
+#include <mach/pinctrl.h>
+#include "mx23_pins.h"
+
 #define PENDING_IRQ_RETRY 100
 static void *saved_sram;
 static int saved_sleep_state;
@@ -305,12 +309,18 @@ static inline void do_standby(void)
 		REGS_CLKCTRL_BASE + HW_CLKCTRL_XTAL);
 
 	/* do suspend */
+#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
+	gpio_request(MXS_PIN_TO_GPIO(PINID_GPMI_D07), "GPIO.05");
+	gpio_direction_output(MXS_PIN_TO_GPIO(PINID_GPMI_D07), 1);
+#endif
 	mx23_cpu_standby_ptr = iram_virtual_addr;
 	mx23_cpu_standby_ptr();
 
 	__raw_writel(reg_clkctrl_clkseq, REGS_CLKCTRL_BASE + HW_CLKCTRL_CLKSEQ);
 	__raw_writel(reg_clkctrl_xtal, REGS_CLKCTRL_BASE + HW_CLKCTRL_XTAL);
-
+#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
+	gpio_direction_output(MXS_PIN_TO_GPIO(PINID_GPMI_D07), 0);
+#endif	
 	saved_sleep_state = 0;  /* waking from standby */
 	__raw_writel(BM_POWER_CTRL_PSWITCH_IRQ,
 		REGS_POWER_BASE + HW_POWER_CTRL_CLR);
