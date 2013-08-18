@@ -400,6 +400,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.drive	= 1,
 		},
 		// Our peripheral power switch pin
+/*
 		{
 				.name = "GPIO.05",
 				.id = PINID_GPMI_D07,
@@ -412,6 +413,7 @@ static struct pin_desc imx233_olinuxino_fixed_pins[] = {
 				.data = 0,
 #endif
 		},
+*/
 		{
 				.name = "GPIO.07",
 				.id = PINID_GPMI_D06,
@@ -654,8 +656,8 @@ static void mxs_request_pins(struct pin_desc *pins, int nr)
 int olinuxino_tsc2007_pin_init(void)
 {
 	/* intr */
-	gpio_request(TSC2007_IRQGPIO, "TSC2007_IRQ");
-	gpio_export(TSC2007_IRQGPIO, true);
+	//gpio_request(TSC2007_IRQGPIO, "TSC2007_IRQ");
+	//gpio_export(TSC2007_IRQGPIO, true);
 	gpio_direction_input(TSC2007_IRQGPIO);
 	return 0;
 }

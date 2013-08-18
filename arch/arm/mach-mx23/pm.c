@@ -28,6 +28,8 @@
 #include <linux/kthread.h>
 #include <linux/slab.h>
 
+#include <linux/kmod.h>
+
 #include <asm/cacheflush.h>
 #include <asm/mach-types.h>
 
@@ -61,6 +63,8 @@ static int saved_sleep_state;
 #define LOWER_VDDD 8
 #define MAX_POWEROFF_CODE_SIZE (6 * 1024)
 #define REGS_CLKCTRL_BASE IO_ADDRESS(CLKCTRL_PHYS_ADDR)
+
+static const char * const shutdown_argv[] = { "/sbin/shutdown", "-h", "-P", "now", NULL };
 
 static void mx23_standby(void)
 {
@@ -309,18 +313,13 @@ static inline void do_standby(void)
 		REGS_CLKCTRL_BASE + HW_CLKCTRL_XTAL);
 
 	/* do suspend */
-#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
-	gpio_request(MXS_PIN_TO_GPIO(PINID_GPMI_D07), "GPIO.05");
-	gpio_direction_output(MXS_PIN_TO_GPIO(PINID_GPMI_D07), 1);
-#endif
+
 	mx23_cpu_standby_ptr = iram_virtual_addr;
 	mx23_cpu_standby_ptr();
 
 	__raw_writel(reg_clkctrl_clkseq, REGS_CLKCTRL_BASE + HW_CLKCTRL_CLKSEQ);
 	__raw_writel(reg_clkctrl_xtal, REGS_CLKCTRL_BASE + HW_CLKCTRL_XTAL);
-#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
-	gpio_direction_output(MXS_PIN_TO_GPIO(PINID_GPMI_D07), 0);
-#endif	
+
 	saved_sleep_state = 0;  /* waking from standby */
 	__raw_writel(BM_POWER_CTRL_PSWITCH_IRQ,
 		REGS_POWER_BASE + HW_POWER_CTRL_CLR);
@@ -340,6 +339,8 @@ static inline void do_standby(void)
 	clk_put(cpu_clk);
 
 	iram_free(iram_phy_addr, MAX_POWEROFF_CODE_SIZE);
+	
+
 }
 
 static u32 clk_regs[] = {
@@ -495,7 +496,14 @@ static int mx23_pm_enter(suspend_state_t state)
 {
 	switch (state) {
 	case PM_SUSPEND_STANDBY:
+		#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
+			//gpio_request(MXS_PIN_TO_GPIO(PINID_GPMI_D07), "GPIO.05");
+			gpio_direction_output(MXS_PIN_TO_GPIO(PINID_GPMI_D07), 1);
+		#endif
 		do_standby();
+		#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
+			gpio_direction_output(MXS_PIN_TO_GPIO(PINID_GPMI_D07), 0);
+		#endif	
 		break;
 	case PM_SUSPEND_MEM:
 		do_mem();
@@ -566,6 +574,12 @@ void mx23_pm_idle(void)
 
 static void mx23_pm_power_off(void)
 {
+	#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
+		gpio_direction_input(MXS_PIN_TO_GPIO(PINID_GPMI_D07));
+		//gpio_direction_output(MXS_PIN_TO_GPIO(PINID_GPMI_D07), 1);
+		//gpio_free(MXS_PIN_TO_GPIO(PINID_GPMI_D07));
+		//mxs_set_pullup(PINID_GPMI_D07, 1, "GPIO.05");
+	#endif
 	__raw_writel((0x3e77 << 16) | 1, REGS_POWER_BASE + HW_POWER_RESET);
 }
 
@@ -596,16 +610,22 @@ static irqreturn_t pswitch_interrupt(int irq, void *dev)
 	if (!(__raw_readl(REGS_POWER_BASE + HW_POWER_CTRL) &
 		BM_POWER_CTRL_PSWITCH_IRQ))
 		return IRQ_HANDLED;
-	for (i = 0; i < 3000; i++) {
+	for (i = 0; i < 5000; i++) {
 		pin_value = __raw_readl(REGS_POWER_BASE + HW_POWER_STS) &
 			BF_POWER_STS_PSWITCH(0x1);
 		if (pin_value == 0)
 			break;
 		mdelay(1);
 	}
-	if (i < 3000) {
+	if (i < 5000) {
 		pr_info("pswitch goto suspend\n");
-		complete(&suspend_request);
+		//complete(&suspend_request);
+		pr_info("not going thru with it\n");
+		if(i>1000)
+		{
+			pr_info("pswitch power down\n");
+			call_usermodehelper(shutdown_argv[0], shutdown_argv, NULL, UMH_NO_WAIT);
+		}
 	} else {
 		pr_info("release pswitch to power down\n");
 		for (i = 0; i < 5000; i++) {
@@ -615,7 +635,8 @@ static irqreturn_t pswitch_interrupt(int irq, void *dev)
 				break;
 			mdelay(1);
 		}
-		pr_info("pswitch power down\n");
+		pr_info("pswitch FORCED power down\n");
+		//call_usermodehelper(shutdown_argv[0], shutdown_argv, NULL, UMH_NO_WAIT);
 		mx23_pm_power_off();
 	}
 	__raw_writel(BM_POWER_CTRL_PSWITCH_IRQ,
@@ -651,10 +672,16 @@ static int __init mx23_pm_init(void)
 		 "PM Suspend: can't allocate memory to save portion of SRAM\n");
 		return -ENOMEM;
 	}
-
+	#ifdef CONFIG_MXS_PERIPHERAL_POWER_SWITCH
+		gpio_request(MXS_PIN_TO_GPIO(PINID_GPMI_D07), "GPIO.05");
+		gpio_direction_output(MXS_PIN_TO_GPIO(PINID_GPMI_D07), 0);
+		mxs_set_strength(PINID_GPMI_D07, PAD_12MA, "GPIO.05");
+		mxs_set_voltage(PINID_GPMI_D07, PAD_3_3V, "GPIO.05");
+	#endif
 	pm_power_off = mx23_pm_power_off;
 	pm_idle = mx23_pm_idle;
 	suspend_set_ops(&mx23_suspend_ops);
+	
 	init_pswitch();
 	return 0;
 }
