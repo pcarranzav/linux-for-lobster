@@ -139,7 +139,7 @@ static int blank_panel(int blank)
 static struct mxs_platform_fb_entry fb_entry = {
 	.name = "at56",
 	.x_res = 640,
-	.y_res = 480,
+	.y_res = 960,
 	.bpp = 8,
 	.cycle_time_ns = 40,
 	.lcd_type = MXS_LCD_PANEL_DOTCLK,

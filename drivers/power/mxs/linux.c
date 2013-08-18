@@ -233,15 +233,15 @@ static void check_and_handle_5v_connection(struct mxs_info *info)
 				dev_dbg(info->dev,
 					"5v connection verified\n");
 			if (info->onboard_vbus5v) {
-				if (regulator_is_enabled(
-					info->onboard_vbus5v) > 0) {
+				dev_dbg(info->dev,"checking if reg enabled\n");
+				if (regulator_is_enabled(info->onboard_vbus5v) > 0) {
 					info->onboard_vbus5v_online = 1;
 					pr_debug("When supply from \
 					onboard vbus 5v ,\
 					DO NOT switch to 4p2 \n");
 					break;
+				}
 			}
-		}
 #ifdef CONFIG_MXS_VBUS_CURRENT_DRAW
 	#ifdef CONFIG_USB_GADGET
 		/* if there is USB 2.0 current limitation requirement,
@@ -308,11 +308,7 @@ static void check_and_handle_5v_connection(struct mxs_info *info)
 				dev_dbg(info->dev,
 					"5v disconnection handled\n");
 
-				__raw_writel(__raw_readl(REGS_POWER_BASE +
-				HW_POWER_5VCTRL) &
-				(~BM_POWER_5VCTRL_CHARGE_4P2_ILIMIT)
-				| (0x20 << BP_POWER_5VCTRL_CHARGE_4P2_ILIMIT),
-				REGS_POWER_BASE + HW_POWER_5VCTRL);
+				__raw_writel(__raw_readl(REGS_POWER_BASE + HW_POWER_5VCTRL) & (~BM_POWER_5VCTRL_CHARGE_4P2_ILIMIT) | (0x20 << BP_POWER_5VCTRL_CHARGE_4P2_ILIMIT),REGS_POWER_BASE + HW_POWER_5VCTRL);
 
 			}
 		}
@@ -526,10 +522,11 @@ static void state_machine_work(struct work_struct *work)
 
 	mutex_lock(&info->sm_lock);
 
+	
 	handle_battery_voltage_changes(info);
-
+	dev_dbg(info->dev, "state checking 5V connection\n");
 	check_and_handle_5v_connection(info);
-
+	dev_dbg(info->dev, "state checked 5V\n");
 	if ((info->sm_5v_connection_status != _5v_connected_verified) ||
 			!(info->regulator)) {
 		mod_timer(&info->sm_timer, jiffies + msecs_to_jiffies(100));
@@ -986,12 +983,17 @@ static int mxs_bat_probe(struct platform_device *pdev)
 
 
 	info->onboard_vbus5v = regulator_get(NULL, "vbus5v");
-	if (IS_ERR(info->regulator)) {
+	dev_err(info->dev,
+					"setting onboard_vbus5v\n");
+	
+	if (IS_ERR(info->onboard_vbus5v)) {
 
 		pr_debug("No onboard vbus 5v reg provided\n");
 		info->onboard_vbus5v = NULL;
+		dev_err(info->dev,
+					"didn't work at all\n");
 	}
-
+	
 	return 0;
 
 unregister_ac:

@@ -77,7 +77,7 @@ struct wahoo_state {
 };
 
 
-static int to_channel_id(struct device_attribute *attr);
+static unsigned char to_channel_id(struct device_attribute *attr);
 
 // Send a command to Wahoo. Returns the one-byte response or a negative errno.
 static int wahoo_send_command(struct wahoo_state *st,unsigned char cmd,unsigned char ops[], int nops)
@@ -222,8 +222,11 @@ static ssize_t wahoo_channel_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct wahoo_state *st = dev_get_drvdata(dev);
-	int ch = to_channel_id(attr);
+	unsigned char ch = to_channel_id(attr);
 	int i;
+
+	if(ch == 0xFF)
+		return -EINVAL;
 
 	mutex_lock(&st->lock);
 	
@@ -242,14 +245,19 @@ static ssize_t wahoo_channel_store(struct device *dev,
 	struct wahoo_state *st = dev_get_drvdata(dev);
 	struct chan *cha = (struct chan *) buf;
 	unsigned char ops[3];
-	int ch = to_channel_id(attr);
+	unsigned char ch = to_channel_id(attr);
 	int ret;
 	
+	//dev_err(&st->us->dev, "Channel data store: %x %x\n",ch,cha->id);
+	if(ch == 0xFF)
+		return -EINVAL;
+
 	if (len != sizeof(struct chan))
 		return -EINVAL;
 
 	if(ch != cha->id)
 		return -EINVAL;
+
 
 	mutex_lock(&st->lock);
 	
@@ -306,12 +314,16 @@ static ssize_t wahoo_channel_data_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct wahoo_state *st = dev_get_drvdata(dev);
-	int ch = to_channel_id(attr);
+	unsigned char ch = to_channel_id(attr);
 
 	int ret;
 	unsigned char nBuf[2] = {0,0};
 	unsigned int length;
 	
+	if(ch == 0xFF)
+		return -EINVAL;
+
+
 	mutex_lock(&st->lock);
 	
 	ret = wahoo_send_command(st,CMD_CHANNEL_DATAREQ|ch,NULL,0);
@@ -513,16 +525,16 @@ static struct device_attribute * wahoo_attrs[] = {
 	&dev_attr_reset,
 };
 
-static int to_channel_id(struct device_attribute *attr)
+static unsigned char to_channel_id(struct device_attribute *attr)
 {
-	int ptr;
+	unsigned char ptr;
 
 	for (ptr = 0; ptr < ARRAY_SIZE(wahoo_attrs); ptr++) {
 		if (wahoo_attrs[ptr] == attr)
 			return ptr%2;
 	}
 
-	return -1;
+	return 0xFF;
 }
 
 static int __devinit wahoo_probe(struct spi_device *spi)
@@ -588,29 +600,17 @@ static int __devinit wahoo_probe(struct spi_device *spi)
 		ret = device_create_file(&spi->dev, wahoo_attrs[ptr]);
 		if (ret) {
 			dev_err(&spi->dev, "cannot create attribute %d\n",ptr);
-			goto err_files;
+			for (; ptr > 0; ptr--)
+				device_remove_file(&spi->dev, wahoo_attrs[ptr]);
+
+			return ret;
 		}
 	}
 	
 	spi_set_drvdata(spi, st);
 	
-	//Reset the device
-	/*
-	ret = wahoo_send_command(st,CMD_RESET,NULL, 0);
-	if (ret!=RESPONSE_OK)
-	{
-		ret = -EREMOTEIO;
-		goto err_files;
-	}
-	*/
 	return 0;
 
- err_files:
-	for (; ptr > 0; ptr--)
-		device_remove_file(&spi->dev, wahoo_attrs[ptr]);
-
-
-	return ret;
 }
 
 static int __devexit wahoo_remove(struct spi_device *spi)
