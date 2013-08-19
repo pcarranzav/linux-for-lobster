@@ -723,7 +723,7 @@ void mxs_mmc_cmd_pullup_mmc0(int enable)
 }
 #endif
 
-#if (!defined(CONFIG_SPI_MXS_SSP2)) && (defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE))
+#if ((!defined(CONFIG_SPI_MXS_SSP2)) || defined(CONFIG_MXS_DUAL_SPI) )&& (defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE))
 static struct pin_desc lobster_spi1_pins[] = {
 	{
 	 .name	= "SSP1_DATA0",
@@ -805,7 +805,8 @@ int mxs_spi2_pin_release(void)
 
 	return 0;
 }
-#else
+#endif
+#if !defined(CONFIG_SPI_MXS) || (!defined(CONFIG_SPI_MXS_SSP2) || defined(CONFIG_MXS_DUAL_SPI))
 int mxs_spi_enc_pin_init(void)
 {
 	#if (defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE))

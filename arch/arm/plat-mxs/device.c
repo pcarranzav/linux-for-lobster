@@ -187,6 +187,18 @@ static struct platform_device mxs_spi[] = {
 		.release = mxs_nop_release,
 		},
 	 },
+	 #if defined(CONFIG_MXS_DUAL_SPI)
+	{
+	 .name	= "mxs-spi",
+	 .id	= 1,
+	 .dev = {
+		.dma_mask	       = &common_dmamask,
+		.coherent_dma_mask      = DMA_BIT_MASK(32),
+		.release = mxs_nop_release,
+		},
+	 },
+
+	 #endif
 };
 #endif
 

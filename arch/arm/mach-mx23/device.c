@@ -729,8 +729,11 @@ static struct resource ssp2_resources[] = {
 static void __init mx23_init_spi2(void)
 {
 	struct platform_device *pdev;
-
+	#if !defined(CONFIG_MXS_DUAL_SPI)
 	pdev = mxs_get_device("mxs-spi", 0);
+	#else
+	pdev = mxs_get_device("mxs-spi", 1);
+	#endif
 	if (pdev == NULL || IS_ERR(pdev))
 		return;
 	pdev->resource = ssp2_resources;
@@ -741,7 +744,8 @@ static void __init mx23_init_spi2(void)
 }
 
 
-	#else //SPI on SSP1
+	#endif
+	#if (defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE)) && (!defined(CONFIG_SPI_MXS_SSP2) || defined(CONFIG_MXS_DUAL_SPI))//SPI on SSP1
 
 static struct mxs_spi_platform_data ssp1_data = {
 	.hw_pin_init = mxs_spi_enc_pin_init,
@@ -814,8 +818,12 @@ static void mx23_init_spi1(void)
 
 #if defined(CONFIG_SPI_MXS_SSP2)
 void mx23_init_ssp1(void)				
-{							
-		mx23_init_mmc();		
+{		
+		#if defined(CONFIG_MXS_DUAL_SPI)
+		mx23_init_spi1();
+		#else					
+		mx23_init_mmc();
+		#endif		
 }
 
 void mx23_init_ssp2(void)				

@@ -104,7 +104,7 @@ static struct spi_board_info spi_board_info[] __initdata = {
 		.bus_num	= 1,
 		.chip_select    = 0,
 	},
-#elif defined(CONFIG_SPI_WAHOO) || defined(CONFIG_SPI_WAHOO_MODULE)
+#elif (defined(CONFIG_SPI_WAHOO) || defined(CONFIG_SPI_WAHOO_MODULE)) && !defined(CONFIG_MXS_DUAL_SPI)
 	{
 		.modalias       = "wahoo",
 		.max_speed_hz   = 1000 * 1000, // Max Speed is 1MHz
@@ -114,13 +114,32 @@ static struct spi_board_info spi_board_info[] __initdata = {
 #elif defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 	{
 		.modalias       = "m25p80",
-		.max_speed_hz   = 1 * 1000 * 1000, // Max Speed is 1MHz
+		.max_speed_hz   = 4 * 1000 * 1000, // Max Speed is 1MHz
 		.bus_num	= 1,
 		.chip_select    = 0,
 		.platform_data = &flsh_data,
 	},
 #endif
+#if defined(CONFIG_MXS_DUAL_SPI)
+	#if defined(CONFIG_SPI_SPIDEV) || defined(CONFIG_SPI_SPIDEV_MODULE)
+		{
+			.modalias       = "spidev",
+			.max_speed_hz   = 1* 1000 * 1000,
+			.bus_num	= 2,
+			.chip_select    = 0,
+		},
+	#elif (defined(CONFIG_SPI_WAHOO) || defined(CONFIG_SPI_WAHOO_MODULE))
+		{
+			.modalias       = "wahoo",
+			.max_speed_hz   = 1000 * 1000, // Max Speed is 1MHz
+			.bus_num	= 2,
+			.chip_select    = 0,
+		},
+	#endif
+#endif
 };
+
+
 
 static void spi_device_init(void)
 {

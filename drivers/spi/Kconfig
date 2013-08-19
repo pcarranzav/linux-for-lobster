@@ -355,6 +355,12 @@ config SPI_MXS_SSP2
 	help
 		SPI driver for MXS is SSP1 by default (conflict with MMC). This sets it on SSP2.
 
+config MXS_DUAL_SPI
+	bool "MXS SPI on SSP2 and SSP1"
+	depends on SPI_MXS && SPI_MXS_SSP2
+	help
+		This allows for SPI on SSP1 and SSP2. No MMC's allowed...
+
 #
 # Add new SPI master controllers in alphabetical order above this line
 #
