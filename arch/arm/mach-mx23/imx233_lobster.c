@@ -100,7 +100,7 @@ static struct spi_board_info spi_board_info[] __initdata = {
 #if defined(CONFIG_SPI_SPIDEV) || defined(CONFIG_SPI_SPIDEV_MODULE)
 	{
 		.modalias       = "spidev",
-		.max_speed_hz   = 48 * 1000,
+		.max_speed_hz   = 1* 1000 * 1000,
 		.bus_num	= 1,
 		.chip_select    = 0,
 	},
@@ -114,7 +114,7 @@ static struct spi_board_info spi_board_info[] __initdata = {
 #elif defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 	{
 		.modalias       = "m25p80",
-		.max_speed_hz   = 48 * 1000 * 1000, // Max Speed is 1MHz
+		.max_speed_hz   = 1 * 1000 * 1000, // Max Speed is 1MHz
 		.bus_num	= 1,
 		.chip_select    = 0,
 		.platform_data = &flsh_data,

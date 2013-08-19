@@ -591,6 +591,7 @@ static struct pin_desc lobster_spi2_pins[] = {
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
 	 .pullup = 1,
+	 .pull = 1,
 	 },
 	{
 	 .name	= "SSP2_CMD",
@@ -600,6 +601,7 @@ static struct pin_desc lobster_spi2_pins[] = {
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
 	 .pullup = 1,
+	 .pull = 1,
 	 },
 	{
 	 .name	= "SSP2_SCK",
@@ -609,6 +611,7 @@ static struct pin_desc lobster_spi2_pins[] = {
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
 	 .pullup = 1,
+	 .pull=1,
 	 },
 };
 #endif
@@ -726,41 +729,55 @@ static struct pin_desc lobster_spi1_pins[] = {
 	 .name	= "SSP1_DATA0",
 	 .id	= PINID_SSP1_DATA0,
 	 .fun	= PIN_FUN1,
-	 .strength	= PAD_4MA,
+	 .strength	= PAD_8MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	 //.pull = 1,
+	 //.pullup = 1,
 	 },
 	 {
 	 .name	= "SSP1_DATA1",
 	 .id	= PINID_SSP1_DATA1,
-	 .fun	= PIN_FUN1,
-	 .strength	= PAD_4MA,
+	 .fun	= PIN_GPIO,
+	 .strength	= PAD_8MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	 	 .pull = 1,
+	 .pullup = 1,
+	 .output = 1,
+	 .data = 1,
 	 },
 	 {
 	 .name	= "SSP1_DATA2",
 	 .id	= PINID_SSP1_DATA2,
-	 .fun	= PIN_FUN1,
-	 .strength	= PAD_4MA,
+	 .fun	= PIN_GPIO,
+	 .strength	= PAD_8MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	 	 .pull = 1,
+	 .pullup = 1,
+	 	 .output = 1,
+	 .data = 1,
 	 },
 	{
 	 .name	= "SSP1_DATA3",
 	 .id	= PINID_SSP1_DATA3,
 	 .fun	= PIN_FUN1,
-	 .strength	= PAD_4MA,
+	 .strength	= PAD_8MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	 	 .pull = 1,
+	 .pullup = 1,
 	 },
 	{
 	 .name	= "SSP1_CMD",
 	 .id	= PINID_SSP1_CMD,
 	 .fun	= PIN_FUN1,
-	 .strength	= PAD_4MA,
+	 .strength	= PAD_8MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
+	//	 .pull = 1,
+	// .pullup = 1,
 	 },
 	{
 	 .name	= "SSP1_SCK",
@@ -792,6 +809,7 @@ int mxs_spi2_pin_release(void)
 int mxs_spi_enc_pin_init(void)
 {
 	#if (defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE))
+	printk("Requesting SPI pins.");
 	mxs_request_pins(lobster_spi1_pins, ARRAY_SIZE(lobster_spi1_pins));
 	#endif
 	return 0;

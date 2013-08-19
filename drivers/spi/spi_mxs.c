@@ -60,7 +60,7 @@
 #endif
 
 /* 0 means DMA modei(recommended, default), !0 - PIO mode */
-static int pio =1;/* = 0 */ ;
+static int pio = 1;/* = 0 */ ;
 static int debug;
 
 /**
