@@ -610,7 +610,9 @@ static int __init mxs_spi_probe(struct platform_device *dev)
 	}
 
 	master->bus_num = dev->id + 1;
-	master->num_chipselect = 1;
+
+	//2 CS's for SPI2
+	master->num_chipselect = dev->id + 1;
 
 	/* SPI controller initializations */
 	err = mxs_spi_init_hw(ss);

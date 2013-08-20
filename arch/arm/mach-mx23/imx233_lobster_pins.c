@@ -382,23 +382,25 @@ static struct pin_desc imx233_lobster_fixed_pins[] = {
 				.voltage = PAD_3_3V,
 				.drive	= 1,
 		},*/
-		{
+		{//This is the TSC2007 IRQ pin
 				.name = "GPIO.04",
 				.id = PINID_GPMI_ALE,
 				.fun = PIN_GPIO,
 				.strength = PAD_12MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
-				.output = 1,
-				.data = 1,
+				//.output = 1,
+				//.data = 1,
 		},
-		{ //This is the TSC2007 IRQ pin
+		{ // AT56 MODE pin
 				.name = "GPIO.03",
 				.id = PINID_GPMI_CLE,
 				.fun = PIN_GPIO,
 				.strength = PAD_12MA,
 				.voltage = PAD_3_3V,
 				.drive	= 1,
+				//.output = 1,
+				//.data = 0,
 		},
 		{
 				.name = "GPIO.05",
@@ -579,9 +581,9 @@ static struct pin_desc lobster_spi2_pins[] = {
 	 .fun	= PIN_FUN3,
 	 .strength = PAD_8MA,
 				.voltage = PAD_3_3V,
-				.pullup = 1,
+				//.pullup = 1,
 				.drive = 1,
-				.pull = 1,
+				//.pull = 1,
 	 },
 	{
 	 .name	= "SSP2_DATA3",
@@ -649,12 +651,12 @@ static void mxs_request_pins(struct pin_desc *pins, int nr)
 
 
 #if defined(CONFIG_TOUCHSCREEN_TSC2007)
-#define TSC2007_IRQGPIO		MXS_PIN_TO_GPIO(PINID_GPMI_CLE)
+#define TSC2007_IRQGPIO		MXS_PIN_TO_GPIO(PINID_GPMI_ALE)
 int lobster_tsc2007_pin_init(void)
 {
 	/* intr */
-	gpio_request(TSC2007_IRQGPIO, "TSC2007_IRQ");
-	gpio_export(TSC2007_IRQGPIO, true);
+	//gpio_request(TSC2007_IRQGPIO, "TSC2007_IRQ");
+	//gpio_export(TSC2007_IRQGPIO, true);
 	gpio_direction_input(TSC2007_IRQGPIO);
 	return 0;
 }

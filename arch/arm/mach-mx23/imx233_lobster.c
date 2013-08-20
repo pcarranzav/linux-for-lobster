@@ -46,7 +46,7 @@ static void __init fixup_board(struct machine_desc *desc, struct tag *tags,
 }
 
 #if defined(CONFIG_TOUCHSCREEN_TSC2007)
-#define TSC2007_IRQGPIO		MXS_PIN_TO_GPIO(PINID_GPMI_CLE)
+#define TSC2007_IRQGPIO		MXS_PIN_TO_GPIO(PINID_GPMI_ALE)
 static int tsc2007_get_pendown_state(void)
 {
 	return !gpio_get_value(TSC2007_IRQGPIO);
@@ -104,20 +104,21 @@ static struct spi_board_info spi_board_info[] __initdata = {
 		.bus_num	= 1,
 		.chip_select    = 0,
 	},
-#elif (defined(CONFIG_SPI_WAHOO) || defined(CONFIG_SPI_WAHOO_MODULE)) && !defined(CONFIG_MXS_DUAL_SPI)
-	{
-		.modalias       = "wahoo",
-		.max_speed_hz   = 1000 * 1000, // Max Speed is 1MHz
-		.bus_num	= 1,
-		.chip_select    = 0,
-	},
-#elif defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
+	#elif defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 	{
 		.modalias       = "m25p80",
 		.max_speed_hz   = 4 * 1000 * 1000, // Max Speed is 1MHz
 		.bus_num	= 1,
 		.chip_select    = 0,
 		.platform_data = &flsh_data,
+	},
+
+#elif (defined(CONFIG_SPI_WAHOO) || defined(CONFIG_SPI_WAHOO_MODULE)) && !defined(CONFIG_MXS_DUAL_SPI)
+	{
+		.modalias       = "wahoo",
+		.max_speed_hz   = 1000 * 1000, // Max Speed is 1MHz
+		.bus_num	= 1,
+		.chip_select    = 0,
 	},
 #endif
 #if defined(CONFIG_MXS_DUAL_SPI)
@@ -136,6 +137,14 @@ static struct spi_board_info spi_board_info[] __initdata = {
 			.chip_select    = 0,
 		},
 	#endif
+	/*#if defined(CONFIG_MMC_SPI)
+		{
+			.modalias       = "mmc_spi",
+			.max_speed_hz   = 1000 * 1000, // Max Speed is 1MHz
+			.bus_num	= 2,
+			.chip_select    = 0,
+		},
+	#endif*/
 #endif
 };
 
