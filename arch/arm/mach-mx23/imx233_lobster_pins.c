@@ -602,8 +602,8 @@ static struct pin_desc lobster_spi2_pins[] = {
 	 .strength	= PAD_4MA,
 	 .voltage	= PAD_3_3V,
 	 .drive 	= 1,
-	 .pullup = 1,
-	 .pull = 1,
+	 //.pullup = 1,
+	 //.pull = 1,
 	 },
 	{
 	 .name	= "SSP2_SCK",
@@ -795,6 +795,7 @@ static struct pin_desc lobster_spi1_pins[] = {
 #if defined(CONFIG_SPI_MXS_SSP2)
 int mxs_spi2_pin_init(void)
 {
+	printk("Requesting SPI pins.");
 	mxs_request_pins(lobster_spi2_pins, ARRAY_SIZE(lobster_spi2_pins));
 
 	return 0;

@@ -60,7 +60,7 @@
 #endif
 
 /* 0 means DMA modei(recommended, default), !0 - PIO mode */
-static int pio = 1;/* = 0 */ ;
+static int pio = 0;/* = 0 */ ;
 static int debug;
 
 /**
@@ -216,6 +216,7 @@ static inline u32 mxs_spi_cs(unsigned cs)
 	    ((cs & 2) ? BM_SSP_CTRL0_WAIT_FOR_IRQ : 0);
 }
 
+#define MAX_SINGLE_LEN 65535
 static int mxs_spi_txrx_dma(struct mxs_spi *ss, int cs,
 			    unsigned char *buf, dma_addr_t dma_buf, int len,
 			    int *first, int *last, int write)
@@ -225,60 +226,83 @@ static int mxs_spi_txrx_dma(struct mxs_spi *ss, int cs,
 	int count, status = 0;
 	enum dma_data_direction dir = write ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
 	struct mxs_spi_platform_data *pdata = ss->master_dev->platform_data;
+	int n_remaining = len;
+	int n_transferred = 0;
+	int len_single;
 
-	if (pdata->slave_mode) {
-		/* slave mode only supports IGNORE_CRC=1 && LOCK_CS=0 */
-		/* It's from ic validation result */
-		c0 |= BM_SSP_CTRL0_IGNORE_CRC;
-	} else {
-		c0 |= (*first ? BM_SSP_CTRL0_LOCK_CS : 0);
-		c0 |= (*last ? BM_SSP_CTRL0_IGNORE_CRC : 0);
+	int p_first = 0;
+	int p_last = 0;
+
+	unsigned char *curr_buf;
+	dma_addr_t curr_buf_dma;
+
+	while(n_remaining>0)
+	{
+		len_single = (n_remaining > MAX_SINGLE_LEN) ? MAX_SINGLE_LEN : n_remaining;
+		n_remaining -= len_single;
+
+		curr_buf = buf + n_transferred;
+		
+
+		if(*first && !n_transferred)
+			p_first = !0;
+		if(*last && !n_remaining)
+			p_last = !0;
+
+		if (pdata->slave_mode) {
+			/* slave mode only supports IGNORE_CRC=1 && LOCK_CS=0 */
+			/* It's from ic validation result */
+			c0 |= BM_SSP_CTRL0_IGNORE_CRC;
+		} else {
+			c0 |= (p_first ? BM_SSP_CTRL0_LOCK_CS : 0);
+			c0 |= (p_last ? BM_SSP_CTRL0_IGNORE_CRC : 0);
+		}
+
+		c0 |= (write ? 0 : BM_SSP_CTRL0_READ);
+		c0 |= BM_SSP_CTRL0_DATA_XFER;
+
+		c0 |= mxs_spi_cs(cs);
+
+		if (ss->ver_major > 3) {
+			xfer_size = BF_SSP_XFER_SIZE_XFER_COUNT(len);
+			__raw_writel(xfer_size, ss->regs + HW_SSP_XFER_SIZE);
+		} else {
+			c0 |= BF_SSP_CTRL0_XFER_COUNT(len_single);
+		}
+
+		//if (!dma_buf)
+			curr_buf_dma = dma_map_single(ss->master_dev, curr_buf, len_single, dir);
+
+		ss->pdesc->cmd.cmd.bits.bytes = len_single;
+		ss->pdesc->cmd.cmd.bits.pio_words = 1;
+		ss->pdesc->cmd.cmd.bits.wait4end = 1;
+		ss->pdesc->cmd.cmd.bits.dec_sem = 1;
+		ss->pdesc->cmd.cmd.bits.irq = 1;
+		ss->pdesc->cmd.cmd.bits.command = write ? DMA_READ : DMA_WRITE;
+		ss->pdesc->cmd.address = curr_buf_dma;
+		ss->pdesc->cmd.pio_words[0] = c0;
+		mxs_dma_desc_append(ss->dma, ss->pdesc);
+
+		mxs_dma_reset(ss->dma);
+		mxs_dma_ack_irq(ss->dma);
+		mxs_dma_enable_irq(ss->dma, 1);
+		init_completion(&ss->done);
+		mxs_dma_enable(ss->dma);
+		wait_for_completion(&ss->done);
+		count = 10000;
+		while ((__raw_readl(ss->regs + HW_SSP_CTRL0) & BM_SSP_CTRL0_RUN)
+		       && count--)
+			continue;
+		if (count <= 0) {
+			printk(KERN_ERR "%c: timeout on line %s:%d\n",
+			       write ? 'W' : 'C', __func__, __LINE__);
+			status = -ETIMEDOUT;
+		}
+
+		//if (!dma_buf)
+			dma_unmap_single(ss->master_dev, curr_buf_dma, len, dir);
+		n_transferred += len_single;
 	}
-
-	c0 |= (write ? 0 : BM_SSP_CTRL0_READ);
-	c0 |= BM_SSP_CTRL0_DATA_XFER;
-
-	c0 |= mxs_spi_cs(cs);
-
-	if (ss->ver_major > 3) {
-		xfer_size = BF_SSP_XFER_SIZE_XFER_COUNT(len);
-		__raw_writel(xfer_size, ss->regs + HW_SSP_XFER_SIZE);
-	} else {
-		c0 |= BF_SSP_CTRL0_XFER_COUNT(len);
-	}
-
-	if (!dma_buf)
-		spi_buf_dma = dma_map_single(ss->master_dev, buf, len, dir);
-
-	ss->pdesc->cmd.cmd.bits.bytes = len;
-	ss->pdesc->cmd.cmd.bits.pio_words = 1;
-	ss->pdesc->cmd.cmd.bits.wait4end = 1;
-	ss->pdesc->cmd.cmd.bits.dec_sem = 1;
-	ss->pdesc->cmd.cmd.bits.irq = 1;
-	ss->pdesc->cmd.cmd.bits.command = write ? DMA_READ : DMA_WRITE;
-	ss->pdesc->cmd.address = spi_buf_dma;
-	ss->pdesc->cmd.pio_words[0] = c0;
-	mxs_dma_desc_append(ss->dma, ss->pdesc);
-
-	mxs_dma_reset(ss->dma);
-	mxs_dma_ack_irq(ss->dma);
-	mxs_dma_enable_irq(ss->dma, 1);
-	init_completion(&ss->done);
-	mxs_dma_enable(ss->dma);
-	wait_for_completion(&ss->done);
-	count = 10000;
-	while ((__raw_readl(ss->regs + HW_SSP_CTRL0) & BM_SSP_CTRL0_RUN)
-	       && count--)
-		continue;
-	if (count <= 0) {
-		printk(KERN_ERR "%c: timeout on line %s:%d\n",
-		       write ? 'W' : 'C', __func__, __LINE__);
-		status = -ETIMEDOUT;
-	}
-
-	if (!dma_buf)
-		dma_unmap_single(ss->master_dev, spi_buf_dma, len, dir);
-
 	return status;
 }
 
@@ -612,7 +636,7 @@ static int __init mxs_spi_probe(struct platform_device *dev)
 	master->bus_num = dev->id + 1;
 
 	//2 CS's for SPI2
-	master->num_chipselect = dev->id + 1;
+	master->num_chipselect = 1;
 
 	/* SPI controller initializations */
 	err = mxs_spi_init_hw(ss);
